@@ -4,10 +4,10 @@ A comprehensive web-based restaurant management system built with React, Node.js
 
 ## 🏗️ Architecture
 
-- **Frontend**: React 18 + TypeScript + Tailwind CSS
-- **Backend**: Node.js + Express + TypeScript
+- **Frontend**: React 18 + JavaScript + Tailwind CSS
+- **Backend**: Node.js + Express + JavaScript
 - **Database**: Supabase (PostgreSQL)
-- **Authentication**: Supabase Auth with Row Level Security
+- **Authentication**: Supabase Auth
 
 ## 🚀 Quick Start
 
