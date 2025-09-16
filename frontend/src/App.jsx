@@ -8,6 +8,8 @@ import PageManager from './pages/PageManager';
 import PageOwner from './pages/PageOwner';
 import PageWaiter from './pages/PageWaiter';
 import Home from './pages/Home';
+import LoginForm from './pages/LoginForm';
+
 function App() {
 
   return (
@@ -15,6 +17,7 @@ function App() {
       <Navbar />
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/login" element={<LoginForm />} />
         <Route path="/host" element={<PageHost />} />
         <Route path="/admin" element={<PageAdmin />} />
         <Route path="/chef" element={<PageChef />} />

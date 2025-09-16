@@ -10,6 +10,9 @@ const Navbar = () => {
     <nav className="bg-white shadow-md border-b">
       <div className="max-w-6xl mx-auto px-6 py-4">
         <div className="flex justify-center space-x-6">
+          <Link to="/login">
+            <NavBarButton text="Login" />
+          </Link>
           <Link to="/admin">
             <NavBarButton text="Admin" />
           </Link>
