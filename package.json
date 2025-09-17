@@ -23,7 +23,16 @@
   "devDependencies": {
     "concurrently": "^7.6.0"
   },
-  "keywords": ["restaurant", "management", "react", "nodejs", "supabase"],
+  "keywords": [
+    "restaurant",
+    "management",
+    "react",
+    "nodejs",
+    "supabase"
+  ],
   "author": "Your Team Name",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.57.4"
+  }
 }
