@@ -15,7 +15,7 @@ import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
   const location = useLocation();
-  const showNavbar = location.pathname !== '/'; //temp fix to hide navbar on login page
+  const showNavbar = location.pathname !== '/'; //Temp fix to hide navbar on login page
 
   return (
     <>
