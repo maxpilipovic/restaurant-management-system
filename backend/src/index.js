@@ -1,10 +1,20 @@
+import dotenv from 'dotenv';
+dotenv.config();
+import { createClient } from '@supabase/supabase-js';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
-import dotenv from 'dotenv';
 
-dotenv.config();
+
+
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_KEY;
+
+console.log(supabaseUrl, supabaseKey);
+
+const supabase = createClient(supabaseUrl, supabaseKey);
+
 
 
 const app = express();
@@ -33,14 +43,17 @@ app.get('/health', (req, res) => {
 });
 
 //Test API routes
-app.get('/api/tables', (req, res) => {
-  res.json({ 
-    tables: [
-      { id: 1, number: 1, capacity: 4, status: 'available' },
-      { id: 2, number: 2, capacity: 2, status: 'occupied' },
-      { id: 3, number: 3, capacity: 6, status: 'available' }
-    ]
-  });
+app.get('/api/roles', async (req, res) => {
+  try {
+    const { data, error } = await supabase.from('roles').select('*');
+    if (error) {
+      return res.status(500).json({ error: 'Failed to fetch roles' });
+    }
+    res.json(data);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
 
 app.listen(PORT, () => {
