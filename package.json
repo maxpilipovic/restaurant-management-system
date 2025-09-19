@@ -21,9 +21,18 @@
     "install:all": "npm install && cd frontend && npm install && cd ../backend && npm install"
   },
   "devDependencies": {
-    "concurrently": "^7.6.0"
+    "autoprefixer": "^10.4.21",
+    "concurrently": "^7.6.0",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.13"
   },
-  "keywords": ["restaurant", "management", "react", "nodejs", "supabase"],
+  "keywords": [
+    "restaurant",
+    "management",
+    "react",
+    "nodejs",
+    "supabase"
+  ],
   "author": "Your Team Name",
   "license": "MIT"
 }
