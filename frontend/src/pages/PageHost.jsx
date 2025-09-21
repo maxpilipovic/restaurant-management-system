@@ -6,17 +6,23 @@ export const PageHost = () => {
 
     //hardcoded data
     const [tables, setTables] = useState([
-        { id: 1, table: 1, status: "Open" },
-        { id: 2, table: 2, status: "Open" },
-        { id: 3, table: 3, status: "Open" },
-        { id: 4, table: 4, status: "Open" },
-        { id: 5, table: 5, status: "Open" },
-        { id: 6, table: 6, status: "Open" },
-        { id: 7, table: 7, status: "Open" },
-        { id: 8, table: 8, status: "Open" },
-        { id: 9, table: 9, status: "Open" },
-        { id: 10, table: 10, status: "Occupied" }
+        { id: 1, number: 1, status: "Open", assigned_waiter: null },
+        { id: 2, number: 2, status: "Occupied", assigned_waiter: 1 },
+        { id: 3, number: 3, status: "Open", assigned_waiter: null },
+        { id: 4, number: 4, status: "Open", assigned_waiter: null },
+        { id: 5, number: 5, status: "Open", assigned_waiter: null },
+        { id: 6, number: 6, status: "Open", assigned_waiter: null },
+        { id: 7, number: 7, status: "Open", assigned_waiter: null },
+        { id: 8, number: 8, status: "Open", assigned_waiter: null },
+        { id: 9, number: 9, status: "Open", assigned_waiter: null },
+        { id: 10, number: 10, status: "Open", assigned_waiter: null }
     ]);
+
+    const [workers, setWorkers] = useState([
+        { id: 1, first_name: "Alice", last_name: "Johnson", role: "Waiter" },
+        { id: 2, first_name: "Bob", last_name: "Smith", role: "Waiter" },
+        { id: 3, first_name: "Carol", last_name: "Davis", role: "Host" },
+      ]);
 
     const updateStatus = (id, newStatus) => {
       setTables((prev) =>
@@ -34,6 +40,7 @@ export const PageHost = () => {
           <HostCard
             key={table.id}
             table={table}
+            workers={workers}
             updateStatus={updateStatus}
           />
         ))}
