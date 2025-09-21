@@ -2,7 +2,7 @@ import React from "react";
 
 const ChefCard = ({ order, onUpdateStatus, onPrioritize }) => {
   return (
-    <div className="bg-white shadow-lg rounded-2xl p-4 w-64 flex flex-col justify-between">
+    <div className="bg-white shadow-lg rounded-2xl p-4 flex flex-col justify-between">
       <div>
         <h2 className="text-xl font-bold mb-2">Table {order.table}</h2>
         <ul className="text-sm mb-3">
