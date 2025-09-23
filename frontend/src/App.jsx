@@ -8,6 +8,7 @@ import PageManager from './pages/PageManager';
 import PageOwner from './pages/PageOwner';
 import PageWaiter from './pages/PageWaiter';
 import Home from './pages/Home';
+import CreateAccount from './pages/CreateAccount';
 
 import CreateOrder from './pages/CreateOrder';
 import LoginForm from './pages/LoginForm';
@@ -25,6 +26,7 @@ function App() {
       {showNavbar && <Navbar />}
       <Routes>
         <Route path="/" element={<LoginForm />} />
+        <Route path="/create-account" element={<CreateAccount />} />
         <Route path="/home" element={<Home />} />
         <Route path="/host" element={<PageHost />} />
         <Route path="/admin" element={<PageAdmin />} />

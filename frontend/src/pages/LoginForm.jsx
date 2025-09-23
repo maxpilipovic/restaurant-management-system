@@ -1,5 +1,6 @@
 import React from 'react';
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
 const LoginForm = () => {
@@ -59,6 +60,15 @@ const LoginForm = () => {
                     </button>
                 </form>
 
+                {/* Create Account Link */}
+                <div className="mt-6 text-center">
+                    <p className="text-gray-600">
+                        Don't have an account?{' '}
+                        <Link to="/create-account" className="text-blue-600 hover:text-blue-800 font-semibold">
+                            Create Account
+                        </Link>
+                    </p>
+                </div>
             </div>
         </div>
     );
