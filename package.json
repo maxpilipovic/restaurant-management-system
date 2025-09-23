@@ -34,5 +34,8 @@
     "supabase"
   ],
   "author": "Your Team Name",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.57.4"
+  }
 }
