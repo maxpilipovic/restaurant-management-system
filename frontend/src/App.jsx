@@ -8,6 +8,7 @@ import PageManager from './pages/PageManager';
 import PageOwner from './pages/PageOwner';
 import PageWaiter from './pages/PageWaiter';
 import Home from './pages/Home';
+import CreateOrder from './pages/CreateOrder';
 function App() {
 
   return (
@@ -21,6 +22,7 @@ function App() {
         <Route path="/waiter" element={<PageWaiter />} />
         <Route path="/manager" element={<PageManager />} />
         <Route path="/owner" element={<PageOwner />} />
+        <Route path="/create-order" element={<CreateOrder />} /> 
       </Routes>
     </>
   )

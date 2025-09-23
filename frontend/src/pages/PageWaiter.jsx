@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import TableCard from '../components/common/TableCard';
 
 export const PageWaiter = () => {
@@ -11,15 +12,19 @@ export const PageWaiter = () => {
         { id: 6, number: 6, status: 'Done' },
         { id: 7, number: 7, status: 'Empty' },
         { id: 8, number: 8, status: 'Empty' },
+        { id: 9, number: 9, status: 'Empty' },
+        { id: 10, number: 10, status: 'In progress' },
     ];
 
     return (
         <div className="container mx-auto p-4">
             <div className="flex flex-col items-center mb-8">
                 <h1 className="text-4xl font-bold mb-4">Waiter Dashboard</h1>
-                <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg text-xl">
-                    Create Order
-                </button>
+                 <Link to="/Create-Order">
+                    <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg text-xl">
+                        Create Order
+                    </button>
+                </Link>
             </div>
 
             {}
