@@ -14,7 +14,6 @@ const LoginForm = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log("Login form submitted");
         //Login logic lowkey
         try {
             const { data, error } = await supabase.auth.signInWithPassword({
@@ -30,39 +29,54 @@ const LoginForm = () => {
 
             //Grab user and check if exists
             const user = data.user;
+            console.log(`user: ${JSON.stringify(user.email)}`);
             if (!user) {
                 toast.error('No user found');
                 return;
             }
+            let role;
+            try {
+                const { data, error } = await supabase
+                  .from("users")
+                  .select("role_id")
+                  .eq("email", user.email) 
+                  .single();
+                if (error) {
+                    console.error(error);
+                    toast.error('Failed to fetch role');
+                    return;
+                }
+                role = data.role_id;
+                console.log(`role: ${typeof role}`);
 
-            const res = await fetch(`${backendUrl}/api/getRole`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ userId: user.id })
-            });
-            const { role } = await res.json();
-
-            const roleName = role?.toLowerCase();
+              } catch (err) {
+                console.error(err);
+                res.status(500).json({ error: "Internal server error" });
+              }
 
             //Switch
-            switch (roleName) {
-                case 'chef':
+            switch (role) {
+                case 1:
                     console.log('Navigating to chef page');
-                    navigate('/chef');
+                    navigate('/host');
                     break;
-                case 'waiter':
+                case 2:
                     console.log('Navigating to waiter page');   
                     navigate('/waiter');
                     break;
-                case 'manager':
+                case 3:
                     console.log('Navigating to manager page');
+                    navigate('/chef');
+                    break;
+                case 4:
+                    console.log('Navigating to host page');
                     navigate('/manager');
                     break;
-                case 'host':
-                    console.log('Navigating to host page');
-                    navigate('/host');
+                case 5:
+                    console.log('Navigating to owner page');
+                    navigate('/owner');
                     break;
-                case 'admin':
+                case 6:
                     console.log('Navigating to admin page');
                     navigate('/admin');
                     break;
