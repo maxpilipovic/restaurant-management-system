@@ -67,29 +67,9 @@ app.get('/api/users', async (req, res) => {
   }
 });
 
+
+//Not needed
 app.post("/api/getRole", async (req, res) => {
-  const { userId } = req.body;
-
-  if (!userId) {
-    console.log("Missing userId in request body");
-    return res.status(400).json({ error: "Missing userId in request body" });
-  }
-
-  try {
-    const { data, error } = await supabase
-      .from("users")
-      .select("roles (role_name)")
-      .eq("user_id", userId) // make sure this matches your Supabase column
-      .single();
-
-    if (error) return res.status(400).json({ error: error.message });
-    if (!data || !data.roles) return res.status(404).json({ error: "Role not found" });
-
-    res.json({ role: data.roles.role_name });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Internal server error" });
-  }
 });
 
 app.listen(PORT, () => {

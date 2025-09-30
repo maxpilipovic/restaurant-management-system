@@ -9,6 +9,7 @@ import PageOwner from './pages/PageOwner';
 import PageWaiter from './pages/PageWaiter';
 import Home from './pages/Home';
 import CreateAccount from './pages/CreateAccount';
+import { AuthProvider } from './contexts/AuthContext';
 
 import CreateOrder from './pages/CreateOrder';
 import LoginForm from './pages/LoginForm';
@@ -23,6 +24,7 @@ function App() {
 
   return (
     <>
+     <AuthProvider>
       {showNavbar && <Navbar />}
       <Routes>
         <Route path="/" element={<LoginForm />} />
@@ -36,7 +38,7 @@ function App() {
         <Route path="/owner" element={<PageOwner />} />
         <Route path="/create-order" element={<CreateOrder />} /> 
       </Routes>
-
+    </AuthProvider>
       {/* import toast container */}
       <ToastContainer position="top-right" autoClose={3000} />
     </>
