@@ -172,6 +172,34 @@ app.post('/api/menu', async (req, res) => {
   }
 });
 
+app.get('/api/menu', async (req, res) => {
+  try {
+    const { data, error } = await supabase.from('menu_items').select('*');
+    if (error) {
+      return res.status(500).json({ error: 'Failed to fetch menu items' });
+    }
+    res.json(data);
+  }
+  catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+//GET ORDERS TABLE
+app.get('/api/orders', async (req, res) => {
+  try {
+    const { data, error } = await supabase.from('orders').select('*');
+    if (error) {
+      return res.status(500).json({ error: 'Failed to fetch orders' });
+    }
+    res.json(data);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 //ORDERS TABLE
 app.post('/api/orders', async (req, res) => {
 
@@ -206,12 +234,29 @@ app.post('/api/order_items', async (req, res) => {
       .select();
 
     if (error) {
-      return res.status(500).json({ error: 'Failed to add order_item data' });
+      console.error("Supabase insert error:", error);
+      return res.status(500).json({
+        error: 'Failed to add order_item data',
+        details: error
+      });
     }
 
   } catch (error) {
     console.error(error);
     console.log("Error inserting order_item data");
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+app.get('/api/order_items', async (req, res) => {
+  try {
+    const { data, error } = await supabase.from('order_items').select('*');
+    if (error) {
+      return res.status(500).json({ error: 'Failed to fetch order items' });
+    }
+    res.json(data);
+  } catch (error) {
+    console.error(error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
