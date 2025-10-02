@@ -4,13 +4,13 @@ export const HostCard = ({ table, workers, updateStatus }  ) => {
 
   const toggleStatus = () => {
     const newStatus = table.status === "Open" ? "Occupied" : "Open";
-    updateStatus(table.id, newStatus);
+    updateStatus(table.table_id, newStatus);
   }
 
   return (
     <div className="bg-white shadow-lg rounded-2xl p-4 flex flex-col justify-between">
       <div>
-        <h2 className="text-xl font-bold mb-2">Table {table.table}</h2>
+        <h2 className="text-xl font-bold mb-2">Table {table.table_id}</h2>
         <p
           className={`font-semibold mb-3 ${
             table.status === "Open"
@@ -22,8 +22,8 @@ export const HostCard = ({ table, workers, updateStatus }  ) => {
         </p>
         <p>
           Assigned:{" "}
-          {table.assigned_waiter
-            ? workers.find((w) => w.id === table.assigned_waiter)?.first_name
+          {table.assigned_waiter_id
+            ? workers.find((w) => w.user_id === table.assigned_waiter_id)?.first_name
             : "None"}
         </p>
         <button className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-2 rounded-lg font-medium" onClick={toggleStatus}>

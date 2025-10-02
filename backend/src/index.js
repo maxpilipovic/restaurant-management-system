@@ -151,6 +151,20 @@ app.post('/api/tables', async (req, res) => {
   }
 });
 
+//Get route
+app.get('/api/tables', async (req, res) => {
+  try {
+    const { data, error } = await supabase.from('tables').select('*');
+    if (error) {
+      return res.status(500).json({ error: 'Failed to fetch tables' });
+    }
+    res.json(data);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 //MENU TABLE
 app.post('/api/menu', async (req, res) => {
 

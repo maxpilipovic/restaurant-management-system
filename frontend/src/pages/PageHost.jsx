@@ -1,33 +1,36 @@
 import React from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import HostCard from '../components/common/HostCard';
 
 export const PageHost = () => {
 
     //hardcoded data
-    const [tables, setTables] = useState([
-        { id: 1, number: 1, status: "Open", assigned_waiter: null },
-        { id: 2, number: 2, status: "Occupied", assigned_waiter: 1 },
-        { id: 3, number: 3, status: "Open", assigned_waiter: null },
-        { id: 4, number: 4, status: "Open", assigned_waiter: null },
-        { id: 5, number: 5, status: "Open", assigned_waiter: null },
-        { id: 6, number: 6, status: "Open", assigned_waiter: null },
-        { id: 7, number: 7, status: "Open", assigned_waiter: null },
-        { id: 8, number: 8, status: "Open", assigned_waiter: null },
-        { id: 9, number: 9, status: "Open", assigned_waiter: null },
-        { id: 10, number: 10, status: "Open", assigned_waiter: null }
-    ]);
+    const [tables, setTables] = useState([]);
+    const [workers, setWorkers] = useState([]);
 
-    const [workers, setWorkers] = useState([
-        { id: 1, first_name: "Alice", last_name: "Johnson", role: "Waiter" },
-        { id: 2, first_name: "Bob", last_name: "Smith", role: "Waiter" },
-        { id: 3, first_name: "Carol", last_name: "Davis", role: "Host" },
-      ]);
+
+    //useEffect to pull data
+    useEffect(() => {
+      const fetchData = async () => {
+        try {
+          const tablesResponse = await fetch('http://localhost:3001/api/tables');
+          const tablesData = await tablesResponse.json();
+          setTables(tablesData);
+
+          const workersResponse = await fetch('http://localhost:3001/api/users');
+          const workersData = await workersResponse.json();
+          setWorkers(workersData);
+        } catch (error) {
+          console.error('Error getting tables & workers for host page', error);
+        }
+      };
+      fetchData();
+    }, []);
 
     const updateStatus = (id, newStatus) => {
       setTables((prev) =>
-        prev.map((order) =>
-          order.id === id ? { ...order, status: newStatus } : order
+        prev.map((table) =>
+          table.table_id === id ? { ...table, status: newStatus } : table
         )
       );
     };
