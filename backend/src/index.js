@@ -275,4 +275,41 @@ app.get('/api/order_items', async (req, res) => {
   }
 });
 
+//PATCH route to update order status
+app.patch('/api/orders/:id', async (req, res) => {
+  const { id } = req.params;
+  const { order_status } = req.body;
+
+  try {
+    const { data, error } = await supabase
+      .from('orders')
+      .update({ order_status })
+      .eq('order_id', id)
+      .select();
+
+    if (error) {
+      return res.status(500).json({ error: 'Failed to update order status' });
+    }
+
+    res.json(data);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+//GET REQUEST FOR MENU ITEMS
+app.get('/api/menu_items', async (req, res) => {
+  try {
+    const { data, error } = await supabase.from('menu_items').select('*');
+    if (error) {
+      return res.status(500).json({ error: 'Failed to fetch menu items' });
+    }
+    res.json(data);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 

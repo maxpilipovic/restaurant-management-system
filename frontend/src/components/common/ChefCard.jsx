@@ -1,6 +1,6 @@
 import React from "react";
 
-const ChefCard = ({ order, onUpdateStatus, onPrioritize }) => {
+const ChefCard = ({ order, onUpdateStatus}) => {
   return (
     <div className="bg-white shadow-lg rounded-2xl p-4 flex flex-col justify-between">
       <div>
@@ -23,12 +23,6 @@ const ChefCard = ({ order, onUpdateStatus, onPrioritize }) => {
         </p>
       </div>
       <div className="flex gap-2 flex-wrap">
-        <button
-          className="bg-blue-500 text-white px-3 py-1 rounded-md text-sm"
-          onClick={() => onPrioritize(order.id)}
-        >
-          Prioritize
-        </button>
         <button
           className="bg-yellow-500 text-white px-3 py-1 rounded-md text-sm"
           onClick={() => onUpdateStatus(order.id, "In Progress")}

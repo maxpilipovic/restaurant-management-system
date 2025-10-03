@@ -1,35 +1,76 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import ChefCard from "../components/common/ChefCard";
 
 export const PageChef = () => {
-  const [orders, setOrders] = useState([
-    { id: 1, table: 1, items: ["Burger", "Fries"], status: "Pending" },
-    { id: 2, table: 2, items: ["Pizza", "Coke"], status: "Pending" },
-    { id: 3, table: 3, items: ["Pasta", "Garlic Bread"], status: "Pending" },
-    { id: 4, table: 4, items: ["Steak", "Mashed Potatoes"], status: "Pending" },
-    { id: 5, table: 5, items: ["Salad", "Water"], status: "Pending" },
-    { id: 6, table: 6, items: ["Sushi", "Miso Soup"], status: "Pending" },
-    { id: 7, table: 7, items: ["Ramen", "Tea"], status: "Pending" },
-    { id: 8, table: 8, items: ["Chicken Wings", "Beer"], status: "Pending" },
-    { id: 9, table: 9, items: ["Sandwich", "Juice"], status: "Pending" },
-    { id: 10, table: 10, items: ["Tacos", "Soda"], status: "Pending" },
-  ]);
+  const [orders, setOrders] = useState([]);
 
-  const updateStatus = (id, newStatus) => {
-    setOrders((prev) =>
-      prev.map((order) =>
-        order.id === id ? { ...order, status: newStatus } : order
-      )
-    );
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const tablesResponse = await fetch('http://localhost:3001/api/tables');
+        const tablesData = await tablesResponse.json();
+        
+
+        const ordersResponse = await fetch('http://localhost:3001/api/orders');
+        const ordersData = await ordersResponse.json();
+
+        const orderItemsResponse = await fetch('http://localhost:3001/api/order_items');
+        const orderItemsData = await orderItemsResponse.json();
+        
+
+        // ADD THIS: Fetch menu items
+        const menuItemsResponse = await fetch('http://localhost:3001/api/menu_items');
+        const menuItemsData = await menuItemsResponse.json();
+
+        //Transform the data
+        //LOOK AT THIS ANDREW...
+        const transformedOrders = ordersData.map(order => {
+          const table = tablesData.find(t => t.table_id === order.table_id);
+          const items = orderItemsData
+            .filter(item => item.order_id === order.order_id)
+            .map(item => {
+              // Find the menu item by item_id
+              const menuItem = menuItemsData.find(mi => mi.item_id === item.item_id);
+              return `${menuItem?.name || 'Item'}${item.quantity > 1 ? ` x${item.quantity}` : ''}`;
+            });
+        //LOOK AT THIS ANDREW...
+
+          return {
+            id: order.order_id,
+            table: table?.table_number || 'N/A',
+            items: items,
+            status: order.order_status || 'Pending'
+          };
+        });
+
+        setOrders(transformedOrders);
+
+      } catch (error) {
+        console.error('Error getting tables, orders & order_items for chef page', error);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const updateStatus = async (id, newStatus) => {
+    try {
+      await fetch(`http://localhost:3001/api/orders/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ order_status: newStatus })
+      });
+
+      setOrders((prev) =>
+        prev.map((order) =>
+          order.id === id ? { ...order, status: newStatus } : order
+        )
+      );
+    } catch (error) {
+      console.error('Error updating order status:', error);
+    }
   };
 
-  const prioritizeOrder = (id) => {
-    setOrders((prev) => {
-      const orderToPrioritize = prev.find((o) => o.id === id);
-      const others = prev.filter((o) => o.id !== id);
-      return [orderToPrioritize, ...others];
-    });
-  };
+  
 
   return (
     <div className="p-6">
@@ -40,7 +81,6 @@ export const PageChef = () => {
             key={order.id}
             order={order}
             onUpdateStatus={updateStatus}
-            onPrioritize={prioritizeOrder}
           />
         ))}
       </div>
