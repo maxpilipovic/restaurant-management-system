@@ -11,11 +11,11 @@ const WorkerList = ({ workers, addWorker, removeWorker }) => {
 
             <ul>
                 {workers.map((w) => (
-                    <li key={w.id} className="flex justify-between items-center mb-2">
-                        {w.first_name} {w.last_name} ({w.role})
+                    <li key={w.user_id} className="flex justify-between items-center mb-2">
+                        {w.first_name} {w.last_name}
                         <button
                         className="text-red-600 underline"
-                        onClick={() => removeWorker(w.id)}
+                        onClick={() => removeWorker(w.user_id)}
                         >
                             Remove
                         </button>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import WorkerList from "../components/common/WorkerList";
 import MenuList from "../components/common/MenuList";
 import TableList from "../components/common/TableList";
@@ -6,25 +6,8 @@ import AddWorkerForm from "../components/common/AddWorkerForm";
 
 export const PageManager = () => {
   // Workers
-  const [workers, setWorkers] = useState([
-    { id: 1, first_name: "Alice", last_name: "Johnson", role: "Waiter" },
-    { id: 2, first_name: "Bob", last_name: "Smith", role: "Waiter" },
-    { id: 3, first_name: "Carol", last_name: "Davis", role: "Host" },
-  ]);
-
-  // Tables
-  const [tables, setTables] = useState([
-    { id: 1, number: 1, status: "Open", assigned_waiter: null },
-    { id: 2, number: 2, status: "Occupied", assigned_waiter: 1 },
-    { id: 3, number: 3, status: "Open", assigned_waiter: null },
-    { id: 4, number: 4, status: "Open", assigned_waiter: null },
-    { id: 5, number: 5, status: "Open", assigned_waiter: null },
-    { id: 6, number: 6, status: "Open", assigned_waiter: null },
-    { id: 7, number: 7, status: "Open", assigned_waiter: null },
-    { id: 8, number: 8, status: "Open", assigned_waiter: null },
-    { id: 9, number: 9, status: "Open", assigned_waiter: null },
-    { id: 10, number: 10, status: "Open", assigned_waiter: null }
-  ]);
+  const [workers, setWorkers] = useState([]);
+  const [tables, setTables] = useState([]);
 
   //Menu items
   const [menuItems, setMenuItems] = useState([
@@ -32,6 +15,38 @@ export const PageManager = () => {
     { id: 2, name: "Pizza", price: 15.49, is_special: true },
     { id: 3, name: "Pasta", price: 11.0, is_special: false },
   ]);
+
+  //Grab menu items
+  useEffect(() => {
+    const fetchMenuItems = async () => {
+      try {
+        const response = await fetch('http://localhost:3001/api/menu_items');
+        const data = await response.json();
+        setMenuItems(data);
+      } catch (error) {
+        console.error('Error fetching menu items for manager page', error);
+      }
+    };
+    fetchMenuItems();
+  }, []);
+
+  //Grabs users and tables
+  useEffect(() => {
+        const fetchData = async () => {
+          try {
+            const tablesResponse = await fetch('http://localhost:3001/api/tables');
+            const tablesData = await tablesResponse.json();
+            setTables(tablesData);
+  
+            const workersResponse = await fetch('http://localhost:3001/api/users');
+            const workersData = await workersResponse.json();
+            setWorkers(workersData);
+          } catch (error) {
+            console.error('Error getting tables & workers for host page', error);
+          }
+        };
+        fetchData();
+      }, []);
 
   //Worker stuff
   const addWorker = (first_name, last_name, role) => {
@@ -44,8 +59,9 @@ export const PageManager = () => {
     setWorkers([...workers, newWorker]);
   };
 
+  //This needs to be looked at? Should we delete roles???
   const removeWorker = (id) => {
-    setWorkers(workers.filter((w) => w.id !== id));
+    // setWorkers(workers.filter((w) => w.id !== id));
   };
 
   //Table stuff
@@ -96,7 +112,6 @@ export const PageManager = () => {
         addWorker={addWorker}
         removeWorker={removeWorker}
       />
-      <h1>Test</h1>
       {/* Tables Section */}
       <TableList
         tables={tables}
