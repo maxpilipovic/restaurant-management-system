@@ -1,4 +1,7 @@
 import React, { useState } from "react";
+import { createClient } from "@supabase/supabase-js";
+import { supabase } from "@supabase/supabase-js";
+
 
 // Reusable Card Component
 const InfoCard = ({ title, children }) => {
