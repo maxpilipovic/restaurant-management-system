@@ -18,7 +18,8 @@
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-router-dom": "^7.8.2",
-    "react-toastify": "^11.0.5"
+    "react-toastify": "^11.0.5",
+    "supabase": "^2.40.7"
   },
   "devDependencies": {
     "@eslint/js": "^9.33.0",

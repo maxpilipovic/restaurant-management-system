@@ -1,7 +1,7 @@
 import React from "react";
 
 const TableList = ({ tables, workers, assignTable }) => {
-  const waiters = workers.filter((w) => w.role === "Waiter");
+  //const waiters = workers.filter((w) => w.role === "Waiter");
 
   return (
     <section className="mb-10">
@@ -9,25 +9,25 @@ const TableList = ({ tables, workers, assignTable }) => {
       <div >
         {tables.map((t) => (
           <div
-            key={t.id}
+            key={t.table_id}
           >
             <p>
-              <strong>Table {t.number}</strong> — {t.status}
+              <strong>Table {t.table_number}</strong> — {t.status}
             </p>
             <p>
               Assigned:{" "}
-              {t.assigned_waiter
-                ? workers.find((w) => w.id === t.assigned_waiter)?.first_name
+              {t.assigned_waiter_id
+                ? workers.find((w) => w.user_id === t.assigned_waiter_id)?.first_name
                 : "None"}
             </p>
             <select
               className="border p-2 rounded"
-              value={t.assigned_waiter || ""}
-              onChange={(e) => assignTable(t.id, Number(e.target.value))}
+              value={t.assigned_waiter_id || ""}
+              onChange={(e) => assignTable(t.table_id, Number(e.target.value))}
             >
               <option value="">Unassigned</option>
-              {waiters.map((w) => (
-                <option key={w.id} value={w.id}>
+              {workers.map((w) => (
+                <option key={w.user_id} value={w.user_id}>
                   {w.first_name} {w.last_name}
                 </option>
               ))}
