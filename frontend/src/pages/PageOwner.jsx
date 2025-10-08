@@ -1,7 +1,5 @@
-import React, { useState } from "react";
-import { createClient } from "@supabase/supabase-js";
-import { supabase } from "@supabase/supabase-js";
-
+import React, { useState, useEffect } from "react";
+import { supabase } from '../lib/supabase';
 
 // Reusable Card Component
 const InfoCard = ({ title, children }) => {
@@ -14,95 +12,134 @@ const InfoCard = ({ title, children }) => {
 };
 
 const PageOwner = () => {
-  // Workers (same as Manager)
-  const [workers, setWorkers] = useState([
-    { id: 1, first_name: "Alice", last_name: "Johnson", role: "Waiter" },
-    { id: 2, first_name: "Bob", last_name: "Smith", role: "Waiter" },
-    { id: 3, first_name: "Carol", last_name: "Davis", role: "Host" },
-  ]);
+  // --- State ---
+  const [workers, setWorkers] = useState([]);
+  const [managers, setManagers] = useState([]);
+  const [tables, setTables] = useState([]);
+  const [menuItems, setMenuItems] = useState([]);
+  const [reports, setReports] = useState([]);
 
-  // Managers (Owner can add/remove)
-  const [managers, setManagers] = useState([
-    { id: 1, name: "David" },
-    { id: 2, name: "Emma" },
-  ]);
+  // --- Fetch data on component mount ---
+  useEffect(() => {
+    fetchWorkers();
+    fetchManagers();
+    fetchTables();
+    fetchMenuItems();
+  }, []);
 
-  // Tables
-  const [tables, setTables] = useState([
-    { id: 1, number: 1, status: "Open", assigned_waiter: null },
-    { id: 2, number: 2, status: "Occupied", assigned_waiter: 1 },
-    { id: 3, number: 3, status: "Open", assigned_waiter: null },
-    { id: 4, number: 4, status: "Open", assigned_waiter: null },
-    { id: 5, number: 5, status: "Open", assigned_waiter: null },
-    { id: 6, number: 6, status: "Open", assigned_waiter: null },
-    { id: 7, number: 7, status: "Open", assigned_waiter: null },
-    { id: 8, number: 8, status: "Open", assigned_waiter: null },
-    { id: 9, number: 9, status: "Open", assigned_waiter: null },
-    { id: 10, number: 10, status: "Open", assigned_waiter: null },
-  ]);
-
-  // Menu Items
-  const [menuItems, setMenuItems] = useState([
-    { id: 1, name: "Burger", price: 12.99, is_special: false },
-    { id: 2, name: "Pizza", price: 15.49, is_special: true },
-    { id: 3, name: "Pasta", price: 11.0, is_special: false },
-  ]);
-
-  // Reports (example data)
-  const [reports] = useState([
-    { item: "Burger", quantity: 25, revenue: 250 },
-    { item: "Pizza", quantity: 15, revenue: 180 },
-    { item: "Pasta", quantity: 10, revenue: 120 },
-  ]);
-
-  // --- Worker functions ---
-  const addWorker = (first_name, last_name, role) => {
-    const newWorker = { id: workers.length + 1, first_name, last_name, role };
-    setWorkers([...workers, newWorker]);
+  // --- Workers ---
+  const fetchWorkers = async () => {
+    const { data, error } = await supabase.from("workers").select("*");
+    if (error) console.error("Fetch workers error:", error);
+    else setWorkers(data);
   };
 
-  const removeWorker = (id) => {
-    setWorkers(workers.filter((w) => w.id !== id));
+  const addWorker = async (first_name, last_name, role) => {
+    const { data, error } = await supabase
+      .from("workers")
+      .insert([{ first_name, last_name, role }])
+      .select();
+    if (error) console.error("Add worker error:", error);
+    else setWorkers((prev) => [...prev, ...data]);
   };
 
-  // --- Manager functions ---
-  const addManager = () => {
+  const removeWorker = async (id) => {
+    const { error } = await supabase.from("workers").delete().eq("id", id);
+    if (error) console.error("Delete worker error:", error);
+    else setWorkers((prev) => prev.filter((w) => w.id !== id));
+  };
+
+  // --- Managers ---
+  const fetchManagers = async () => {
+    const { data, error } = await supabase.from("managers").select("*");
+    if (error) console.error("Fetch managers error:", error);
+    else setManagers(data);
+  };
+
+  const addManager = async () => {
     const name = prompt("Enter manager name:");
-    if (name) setManagers([...managers, { id: managers.length + 1, name }]);
+    if (!name) return;
+    const { data, error } = await supabase.from("managers").insert([{ name }]).select();
+    if (error) console.error("Add manager error:", error);
+    else setManagers((prev) => [...prev, ...data]);
   };
 
-  const removeManager = (id) => {
-    setManagers(managers.filter((m) => m.id !== id));
+  const removeManager = async (id) => {
+    const { error } = await supabase.from("managers").delete().eq("id", id);
+    if (error) console.error("Delete manager error:", error);
+    else setManagers((prev) => prev.filter((m) => m.id !== id));
   };
 
-  // --- Table functions ---
-  const assignTable = (tableId, waiterId) => {
-    setTables((prev) =>
+  // --- Tables ---
+  const fetchTables = async () => {
+    const { data, error } = await supabase.from("tables").select("*");
+    if (error) console.error("Fetch tables error:", error);
+    else setTables(data);
+  };
+
+  const assignTable = async (tableId, waiterId) => {
+    const { error } = await supabase
+      .from("tables")
+      .update({ assigned_waiter: waiterId })
+      .eq("id", tableId);
+    if (error) console.error("Assign table error:", error);
+    else setTables((prev) =>
       prev.map((t) => (t.id === tableId ? { ...t, assigned_waiter: waiterId } : t))
     );
   };
 
-  // --- Menu functions ---
-  const addMenuItem = (name, price) => {
-    const newItem = { id: menuItems.length + 1, name, price, is_special: false };
-    setMenuItems([...menuItems, newItem]);
+  // --- Menu Items ---
+  const fetchMenuItems = async () => {
+    const { data, error } = await supabase.from("menu_items").select("*");
+    if (error) console.error("Fetch menu items error:", error);
+    else setMenuItems(data);
   };
 
-  const removeMenuItem = (id) => {
-    setMenuItems(menuItems.filter((item) => item.id !== id));
+  const addMenuItem = async (name, price) => {
+    const { data, error } = await supabase
+      .from("menu_items")
+      .insert([{ name, price, is_special: false }])
+      .select();
+    if (error) console.error("Add menu item error:", error);
+    else setMenuItems((prev) => [...prev, ...data]);
   };
 
-  const changePrice = (id, newPrice) => {
-    setMenuItems((prev) =>
+  const removeMenuItem = async (id) => {
+    const { error } = await supabase.from("menu_items").delete().eq("id", id);
+    if (error) console.error("Delete menu item error:", error);
+    else setMenuItems((prev) => prev.filter((item) => item.id !== id));
+  };
+
+  const changePrice = async (id, newPrice) => {
+    const { error } = await supabase.from("menu_items").update({ price: newPrice }).eq("id", id);
+    if (error) console.error("Change price error:", error);
+    else setMenuItems((prev) =>
       prev.map((item) => (item.id === id ? { ...item, price: newPrice } : item))
     );
   };
 
-  const toggleSpecial = (id) => {
-    setMenuItems((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, is_special: !item.is_special } : item))
+  const toggleSpecial = async (id) => {
+    const item = menuItems.find((i) => i.id === id);
+    if (!item) return;
+    const { error } = await supabase
+      .from("menu_items")
+      .update({ is_special: !item.is_special })
+      .eq("id", id);
+    if (error) console.error("Toggle special error:", error);
+    else setMenuItems((prev) =>
+      prev.map((i) => (i.id === id ? { ...i, is_special: !i.is_special } : i))
     );
   };
+
+  // --- Reports (example, can be dynamic later) ---
+  useEffect(() => {
+    const reportData = menuItems.map((item) => ({
+      item: item.name,
+      quantity: Math.floor(Math.random() * 20), // example quantity
+      revenue: item.price * Math.floor(Math.random() * 20),
+    }));
+    setReports(reportData);
+  }, [menuItems]);
 
   return (
     <div className="p-6">
@@ -238,3 +275,4 @@ const PageOwner = () => {
 };
 
 export default PageOwner;
+
