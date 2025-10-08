@@ -13,13 +13,16 @@ export const PageHost = () => {
   const [tables, setTables] = useState([]);
   const [workers, setWorkers] = useState([]);
   const [hostName, setHostName] = useState("");
-    
+  const [role, setRole] = useState("");
+
   //Grab hostname
   useEffect(() => {
+    if (!user) return;
+
     if (user) {
       // Grab the name from user metadata, fallback to email if not set
       console.log("User metadata:", user.user_metadata);
-      setHostName(user.user_metadata?.full_name || user.email);
+      setHostName(user.email);
     }
   }, [user]);
 
@@ -66,7 +69,6 @@ export const PageHost = () => {
 
   // Handle loading/auth
   if (loading) return <div className="p-6 text-gray-600">Loading host dashboard...</div>;
-  if (!user) return <div className="p-6 text-red-600">You must be logged in to view this page.</div>;
 
   return (
     <div className="p-6">
