@@ -5,6 +5,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { toast } from 'react-toastify';
 
+//I'D LIKE to HAVE A NAVBAR FOR ONLY ADMINS. Normal users don't get navbar and go direcrtly to their page.
 //Baisc navbar with onClick function
 const Navbar = () => {
   const navigate = useNavigate();
