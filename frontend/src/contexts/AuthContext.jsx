@@ -1,3 +1,6 @@
+/* eslint-disable react-refresh/only-export-components */
+
+//Fix this error josh? ^
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 

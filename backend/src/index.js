@@ -312,5 +312,26 @@ app.get('/api/menu_items', async (req, res) => {
   }
 });
 
-//DELETE
+//POST 
+app.put('/api/tables/:id', async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+
+  try {
+    const { data, error } = await supabase
+      .from('tables')
+      .update({ status })
+      .eq('table_id', id)
+      .select();
+
+    if (error) {
+      return res.status(500).json({ error: 'Failed to update table status' });
+    }
+
+    res.json(data);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
 

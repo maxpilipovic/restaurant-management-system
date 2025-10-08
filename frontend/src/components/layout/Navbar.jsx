@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from 'react'; 
+import React from 'react'; 
 import NavBarButton from '../common/NavbarButton';
 import { Navigate } from 'react-router-dom';
 import { Link, useNavigate } from 'react-router-dom';
-import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { toast } from 'react-toastify';
 
