@@ -335,3 +335,169 @@ app.put('/api/tables/:id', async (req, res) => {
   }
 });
 
+//GET ROLES
+app.get('/api/roles', async (req, res) => {
+  try {
+    const { data, error } = await supabase.from('roles').select('*');
+    if (error) {
+      return res.status(500).json({ error: 'Failed to fetch roles' });
+    }
+    res.json(data);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+//PUT to update worker role
+app.put('/api/users/:id/role', async (req, res) => {
+  const { id } = req.params;
+  const { role_id } = req.body;
+
+  try {
+    const { data, error } = await supabase
+      .from('users')
+      .update({ role_id })
+      .eq('user_id', id)
+      .select();
+
+    if (error) {
+      return res.status(500).json({ error: 'Failed to update user role' });
+    }
+
+    res.json(data);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+//DELETE worker
+app.delete('/api/users/:id', async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const { data, error } = await supabase
+      .from('users')
+      .delete()
+      .eq('user_id', id)
+      .select();
+
+    if (error) {
+      return res.status(500).json({ error: 'Failed to delete user' });
+    }
+
+    res.json({ message: 'User deleted successfully', data });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+app.put('/api/users/:id/unassign-tables', async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const { error } = await supabase
+      .from('tables')
+      .update({ assigned_waiter_id: null })
+      .eq('assigned_waiter_id', id);
+
+    if (error) throw error;
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to unassign tables' });
+  }
+});
+
+//PUT to assign table to waiter
+app.put('/api/tables/:id/assign', async (req, res) => {
+  const { id } = req.params;
+  const { assigned_waiter_id } = req.body;
+
+  try {
+    const { data, error } = await supabase
+      .from('tables')
+      .update({ assigned_waiter_id })
+      .eq('table_id', id)
+      .select();
+
+    if (error) {
+      return res.status(500).json({ error: 'Failed to assign table to waiter' });
+    }
+
+    res.json(data);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+//MENU API CALLS
+//Add menu item
+app.post('/api/menu_items/add', async (req, res) => {
+  const { name, price } = req.body;
+
+  try {
+    const { data, error } = await supabase
+      .from('menu_items')
+      .insert([{ name, price}])
+      .select();
+
+    if (error) {
+      return res.status(500).json({ error: 'Failed to add menu item' });
+    }
+
+    res.json(data[0]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+//Delete menu item
+app.delete('/api/menu_items/:id/delete_menuitem', async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const { data, error } = await supabase
+      .from('menu_items')
+      .delete()
+      .eq('item_id', id)
+      .select();
+
+    if (error) {
+      return res.status(500).json({ error: 'Failed to delete menu item' });
+    }
+
+    res.json({ message: 'Menu item deleted successfully', data });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+//Change price of menu item
+app.put('/api/menu_items/:id/change', async (req, res) => {
+  const { id } = req.params;
+  const { price } = req.body;
+
+  try {
+    const { data, error } = await supabase
+      .from('menu_items')
+      .update({ price })
+      .eq('item_id', id)
+      .select();
+
+    if (error) {
+      return res.status(500).json({ error: 'Failed to update menu item price' });
+    }
+
+    res.json(data[0]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});

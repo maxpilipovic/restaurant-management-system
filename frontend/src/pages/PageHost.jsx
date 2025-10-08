@@ -3,6 +3,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { useState, useEffect } from 'react';
 import HostCard from '../components/common/HostCard';
 
+//STILL HAVE TO CHECK ROLE ON EACH PAGE
+
 export const PageHost = () => {
 
   const { user,loading } = useAuth(); 
