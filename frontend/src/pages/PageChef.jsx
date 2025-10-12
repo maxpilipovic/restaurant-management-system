@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import ChefCard from "../components/common/ChefCard";
 import { useAuth } from "../contexts/AuthContext";
+import LoadingPage from "../common/loadingPage";
+import ErrorPage from "../common/errorPage";
 
 export const PageChef = () => {
   const [orders, setOrders] = useState([]);
@@ -26,7 +28,7 @@ export const PageChef = () => {
 
         //Check if host or admin
         //Not sure if chef is 2?
-        if (currentUser && currentUser.role_id === 3 || currentUser.role_id === 6) {
+        if (currentUser && (currentUser.role_id === 3 || currentUser.role_id === 6)) {
           setAuthorized(true);
           setHostName(currentUser.first_name + " " + currentUser.last_name);
 
@@ -109,18 +111,14 @@ export const PageChef = () => {
     }
   };
 
-  // Handle loading/auth
-  if (loading || authorized === null) { 
-    return <div className="p-6 text-gray-600">Loading host dashboard...</div>;
+  //Loading page
+  if (loading || authorized === null) {
+    return <LoadingPage />;
   }
 
-  //Display error page
+  //Error page
   if (!authorized) {
-    return (
-      <div className="p-6 text-red-600 font-bold text-xl">
-        Access denied. You are not authorized to view this page.
-      </div>
-    );
+    return <ErrorPage message="You are not authorized to view this page." />;
   }
   
 

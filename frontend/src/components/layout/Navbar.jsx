@@ -10,7 +10,7 @@ import { toast } from 'react-toastify';
 //Baisc navbar with onClick function
 const Navbar = () => {
   const navigate = useNavigate();
-  const { user, loading,  signOut } = useAuth();
+  const { user,  signOut } = useAuth();
   const [isAdmin, setIsAdmin] = useState(false); 
   const [checkedAccess, setCheckedAccess] = useState(false);
 
@@ -61,19 +61,7 @@ const Navbar = () => {
     }
   };
 
-  if (loading && !checkedAccess) {
-    return (
-      <nav className="bg-white shadow-md border-b">
-        <div className="max-w-6xl mx-auto px-6 py-4">
-          <div className="flex justify-center">
-            <div className="text-gray-500">Loading...</div>
-          </div>
-        </div>
-      </nav>
-    );
-  }
-
-  if (!user) {
+  if (!user || !checkedAccess) {
     return (
       <nav className="bg-white shadow-md border-b">
         <div className="max-w-6xl mx-auto px-6 py-4">

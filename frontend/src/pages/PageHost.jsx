@@ -2,6 +2,8 @@ import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useState, useEffect } from 'react';
 import HostCard from '../components/common/HostCard';
+import LoadingPage from '../common/loadingPage';
+import ErrorPage from '../common/errorPage';
 
 //STILL HAVE TO CHECK ROLE ON EACH PAGE
 
@@ -33,7 +35,7 @@ export const PageHost = () => {
 
         //Check if host or admin
         //Host is 2?
-        if (currentUser && currentUser.role_id === 2 || currentUser.role_id === 6) {
+        if (currentUser && (currentUser.role_id === 2 || currentUser.role_id === 6)) {
           setAuthorized(true);
           setHostName(currentUser.first_name + " " + currentUser.last_name);
 
@@ -78,18 +80,14 @@ export const PageHost = () => {
     }
   };
 
-  // Handle loading/auth
-  if (loading || authorized === null) { 
-    return <div className="p-6 text-gray-600">Loading host dashboard...</div>;
+  //Loading page
+  if (loading || authorized === null) {
+    return <LoadingPage />;
   }
 
-  //Display error page
+  //Error page
   if (!authorized) {
-    return (
-      <div className="p-6 text-red-600 font-bold text-xl">
-        Access denied. You are not authorized to view this page.
-      </div>
-    );
+    return <ErrorPage message="You are not authorized to view this page." />;
   }
 
   return (

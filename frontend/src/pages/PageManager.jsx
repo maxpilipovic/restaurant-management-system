@@ -3,6 +3,8 @@ import WorkerList from "../components/common/WorkerList";
 import MenuList from "../components/common/MenuList";
 import TableList from "../components/common/TableList";
 import { useAuth } from "../contexts/AuthContext";
+import LoadingPage from "../common/loadingPage";
+import ErrorPage from "../common/errorPage";
 
 //STILL HAVE TO CHECK ROLE ON EACH PAGE
 
@@ -36,7 +38,7 @@ export const PageManager = () => {
         const currentUser = workersData.find(w => w.email === user.user_metadata.email);
 
         //Check if host or admin
-        if (currentUser && currentUser.role_id === 5 || currentUser.role_id === 6) {
+        if (currentUser && (currentUser.role_id === 5 || currentUser.role_id === 6)) {
           setAuthorized(true);
           setHostName(currentUser.first_name + " " + currentUser.last_name);
 
@@ -210,18 +212,14 @@ export const PageManager = () => {
     }
   };
 
-  // Handle loading/auth
-  if (loading || authorized === null) { 
-    return <div className="p-6 text-gray-600">Loading host dashboard...</div>;
+  //Loading page
+  if (loading || authorized === null) {
+    return <LoadingPage />;
   }
 
-  //Display error page
+  //Error page
   if (!authorized) {
-    return (
-      <div className="p-6 text-red-600 font-bold text-xl">
-        Access denied. You are not authorized to view this page.
-      </div>
-    );
+    return <ErrorPage message="You are not authorized to view this page." />;
   }
 
   return (

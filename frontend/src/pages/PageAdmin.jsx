@@ -4,6 +4,8 @@ import AdminUsers from '../AdminComponents/AdminUsers.jsx';
 import AdminTables from '../AdminComponents/AdminTables.jsx';
 import AdminOrders from '../AdminComponents/AdminOrders.jsx';
 import AdminMenuItems from '../AdminComponents/AdminMenuItems.jsx';
+import LoadingPage from '../common/loadingPage';
+import ErrorPage from '../common/errorPage';
 
 //STILL HAVE TO CHECK ROLE ON EACH PAGE
 
@@ -64,15 +66,14 @@ export const PageAdmin = () => {
       checkAccess();
     }, [user]);
 
-  if (loading) return <div className="p-6 text-gray-600">Loading admin dashboard...</div>;
+  //Loading page
+  if (loading || authorized === null) {
+    return <LoadingPage />;
+  }
 
-  //Display error page
+  //Error page
   if (!authorized) {
-    return (
-      <div className="p-6 text-red-600 font-bold text-xl">
-        Access denied. You are not authorized to view this page.
-      </div>
-    );
+    return <ErrorPage message="You are not authorized to view this page." />;
   }
 
   return (
