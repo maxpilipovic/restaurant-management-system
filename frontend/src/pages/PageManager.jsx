@@ -11,10 +11,52 @@ export const PageManager = () => {
   const [workers, setWorkers] = useState([]);
   const [tables, setTables] = useState([]);
   const [roles, setRoles] = useState([]);
+  const [hostName, setHostName] = useState("");
+  const [authorized, setAuthorized] = useState(null);
+
+  //Auth
+  const { user,loading } = useAuth();
 
   //Menu items
   const [menuItems, setMenuItems] = useState([]);
 
+  useEffect(() => {
+    
+    //Check if metadata exists
+    if (!user) {
+      return;
+    }
+
+    const checkAccess = async () => {
+      try {
+        const workersResponse = await fetch('http://localhost:3001/api/users');
+        const workersData = await workersResponse.json();
+        setWorkers(workersData);
+
+        const currentUser = workersData.find(w => w.email === user.user_metadata.email);
+
+        //Check if host or admin
+        if (currentUser && currentUser.role_id === 5 || currentUser.role_id === 6) {
+          setAuthorized(true);
+          setHostName(currentUser.first_name + " " + currentUser.last_name);
+
+          const tablesResponse = await fetch('http://localhost:3001/api/tables');
+          const tablesData = await tablesResponse.json();
+          setTables(tablesData);
+        }
+        else  {
+          setAuthorized(false);
+          console.log("Not authorized, lowkey");
+        }
+      } catch (error) {
+        console.error("Error checking access for host page", error);
+        setAuthorized(false);
+      }
+    };
+
+    checkAccess();
+  }, [user]);
+  
   //Grab roles
   useEffect(() => {
     const fetchRoles = async () => {
@@ -168,8 +210,27 @@ export const PageManager = () => {
     }
   };
 
+  // Handle loading/auth
+  if (loading || authorized === null) { 
+    return <div className="p-6 text-gray-600">Loading host dashboard...</div>;
+  }
+
+  //Display error page
+  if (!authorized) {
+    return (
+      <div className="p-6 text-red-600 font-bold text-xl">
+        Access denied. You are not authorized to view this page.
+      </div>
+    );
+  }
+
   return (
     <div className="p-6">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold">
+          Welcome, {hostName}
+        </h1>
+      </div>
       <h1 className="text-3xl font-bold mb-6">Manager Dashboard</h1>
 
       {/* Workers Section */}

@@ -13,37 +13,48 @@ export const PageHost = () => {
   const [tables, setTables] = useState([]);
   const [workers, setWorkers] = useState([]);
   const [hostName, setHostName] = useState("");
-  const [role, setRole] = useState("");
-
-  //Grab hostname
-  useEffect(() => {
-    if (!user) return;
-
-    if (user) {
-      // Grab the name from user metadata, fallback to email if not set
-      console.log("User metadata:", user.user_metadata);
-      setHostName(user.email);
-    }
-  }, [user]);
+  const [authorized, setAuthorized] = useState(null);
 
   //useEffect to pull data
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const tablesResponse = await fetch('http://localhost:3001/api/tables');
-        const tablesData = await tablesResponse.json();
-        setTables(tablesData);
+    
+    //Check if metadata exists
+    if (!user) {
+      return;
+    }
 
+    const checkAccess = async () => {
+      try {
         const workersResponse = await fetch('http://localhost:3001/api/users');
         const workersData = await workersResponse.json();
         setWorkers(workersData);
+
+        const currentUser = workersData.find(w => w.email === user.user_metadata.email);
+
+        //Check if host or admin
+        //Host is 2?
+        if (currentUser && currentUser.role_id === 2 || currentUser.role_id === 6) {
+          setAuthorized(true);
+          setHostName(currentUser.first_name + " " + currentUser.last_name);
+
+          const tablesResponse = await fetch('http://localhost:3001/api/tables');
+          const tablesData = await tablesResponse.json();
+          setTables(tablesData);
+        }
+        else  {
+          setAuthorized(false);
+          console.log("Not authorized, lowkey");
+        }
       } catch (error) {
-        console.error('Error getting tables & workers for host page', error);
+        console.error("Error checking access for host page", error);
+        setAuthorized(false);
       }
     };
-    fetchData();
-  }, []);
-    
+
+    checkAccess();
+  }, [user]);
+  
+  //Update status function for tables
   const updateStatus = async (id, newStatus) => {
 
     //Lets update frontend first lowkey.
@@ -68,7 +79,18 @@ export const PageHost = () => {
   };
 
   // Handle loading/auth
-  if (loading) return <div className="p-6 text-gray-600">Loading host dashboard...</div>;
+  if (loading || authorized === null) { 
+    return <div className="p-6 text-gray-600">Loading host dashboard...</div>;
+  }
+
+  //Display error page
+  if (!authorized) {
+    return (
+      <div className="p-6 text-red-600 font-bold text-xl">
+        Access denied. You are not authorized to view this page.
+      </div>
+    );
+  }
 
   return (
     <div className="p-6">

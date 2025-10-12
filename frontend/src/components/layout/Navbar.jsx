@@ -1,6 +1,7 @@
 import React from 'react'; 
+import { useEffect, useState } from 'react';
 import NavBarButton from '../common/NavbarButton';
-import { Navigate } from 'react-router-dom';
+//import { Navigate } from 'react-router-dom';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { toast } from 'react-toastify';
@@ -9,9 +10,45 @@ import { toast } from 'react-toastify';
 //Baisc navbar with onClick function
 const Navbar = () => {
   const navigate = useNavigate();
-  const { user,loading,  signOut } = useAuth();
+  const { user, loading,  signOut } = useAuth();
+  const [isAdmin, setIsAdmin] = useState(false); 
+  const [checkedAccess, setCheckedAccess] = useState(false);
 
-  
+  //useEffect to pull data
+  useEffect(() => {
+    
+    //Check if metadata exists
+    if (!user) {
+      return;
+    }
+
+    const checkAccess = async () => {
+      try {
+        const workersResponse = await fetch('http://localhost:3001/api/users');
+        const workersData = await workersResponse.json();
+
+        const currentUser = workersData.find(w => w.email === user.user_metadata.email);
+
+        //Check if host or admin
+        //Host is 2?
+        if (currentUser || currentUser.role_id === 6) {
+          setIsAdmin(true);
+
+        }
+        else  {
+          setIsAdmin(false);
+          console.log("NOT AN ADMIN");
+        }
+      } catch (error) {
+        console.error("Error checking access for ADMIN PAGE", error);
+      }
+      finally{
+        setCheckedAccess(true);
+      }
+    };
+
+    checkAccess();
+  }, [user]);
 
   const handleSignOut = async () => {
     try {
@@ -24,7 +61,7 @@ const Navbar = () => {
     }
   };
 
-  if (loading) {
+  if (loading && !checkedAccess) {
     return (
       <nav className="bg-white shadow-md border-b">
         <div className="max-w-6xl mx-auto px-6 py-4">
@@ -50,13 +87,15 @@ const Navbar = () => {
     );
   }
 
-  return (
-    <nav className="bg-white shadow-md border-b">
-      <div className="max-w-6xl mx-auto px-6 py-4">
-        <div className="flex justify-between items-center">
-          <div className="flex space-x-6">
+  // AI GENERATED A NEW NAVBAR FOR ADMINS.
+  if (isAdmin) {
+    return (
+      <nav className="bg-gradient-to-r from-blue-600 to-indigo-700 shadow-lg border-b border-blue-800">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center text-white">
+          {/* Left Side */}
+          <div className="flex items-center space-x-6">
             <Link to="/admin">
-              <NavBarButton text="Admin" />
+              <NavBarButton text="Dashboard" />
             </Link>
             <Link to="/chef">
               <NavBarButton text="Chef" />
@@ -74,20 +113,34 @@ const Navbar = () => {
               <NavBarButton text="Waiter" />
             </Link>
           </div>
-          
+
+          {/* Right Side */}
           <div className="flex items-center space-x-4">
-            <span className="text-sm text-gray-600">
-              Welcome, {user.email}
+            <span className="text-sm text-blue-100 font-medium">
+              {user.email}
             </span>
             <button
               onClick={handleSignOut}
-              disabled={loading}
-              className="bg-red-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-red-700 transition transform active:scale-95 disabled:opacity-50"
+              className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-semibold transition transform active:scale-95"
             >
-              {loading ? 'Signing out...' : 'Sign Out'}
+              Sign Out
             </button>
           </div>
         </div>
+      </nav>
+    );
+  }
+
+  // ---------- NON-ADMIN NAVBAR ----------
+  return (
+    <nav className="bg-gray-100 border-b shadow-sm">
+      <div className="max-w-6xl mx-auto px-6 py-4 flex justify-center">
+        <button
+          onClick={handleSignOut}
+          className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-semibold transition transform active:scale-95"
+        >
+          Sign Out
+        </button>
       </div>
     </nav>
   );
