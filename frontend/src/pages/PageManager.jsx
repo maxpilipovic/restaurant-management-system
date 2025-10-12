@@ -213,12 +213,12 @@ export const PageManager = () => {
   };
 
   //Loading page
-  if (loading || authorized === null) {
+  if (loading) {
     return <LoadingPage />;
   }
 
   //Error page
-  if (!authorized) {
+  if (!authorized || authorized === null) {
     return <ErrorPage message="You are not authorized to view this page." />;
   }
 
