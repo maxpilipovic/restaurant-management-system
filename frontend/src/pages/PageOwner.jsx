@@ -30,7 +30,6 @@ export const PageOwner = () => {
           const currentUser = workersData.find(w => w.email === user.user_metadata.email);
   
           //Check if host or admin
-          //Double check what owner is in db
           if (currentUser && (currentUser.role_id === 5 || currentUser.role_id === 6)) {
             setAuthorized(true);
             setHostName(currentUser.first_name + " " + currentUser.last_name);

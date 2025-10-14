@@ -38,7 +38,7 @@ export const PageManager = () => {
         const currentUser = workersData.find(w => w.email === user.user_metadata.email);
 
         //Check if host or admin
-        if (currentUser && (currentUser.role_id === 5 || currentUser.role_id === 6)) {
+        if (currentUser && (currentUser.role_id === 1 || currentUser.role_id === 6)) {
           setAuthorized(true);
           setHostName(currentUser.first_name + " " + currentUser.last_name);
 
