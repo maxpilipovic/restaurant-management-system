@@ -1,59 +1,98 @@
-import React from 'react';
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-const CreateOrder = ({ onaddItem }) => {
+const CreateOrder = () => {
     const [orderItems, setOrderItems] = useState([]);
+    const [menuItems, setMenuItems] = useState([]);
+    const [tables, setTables] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+    
+
     const [selectedItem, setSelectedItem] = useState("");
     const [quantity, setQuantity] = useState(1);
     const [table, setTable] = useState("");
-    const[notes, setNotes] = useState("");
-    
+    const [notes, setNotes] = useState("");
 
-const tables = [
-        { id: 1, number: 1 },
-        { id: 2, number: 2},
-        { id: 3, number: 3},
-        { id: 4, number: 4},
-        { id: 5, number: 5},
-        { id: 6, number: 6},
-        { id: 7, number: 7},
-        { id: 8, number: 8},
-        { id: 9, number: 9},
-        { id: 10, number: 10},
-    ];
-    const mockMenuItems = [
-    { id: 1, name: 'Spaghetti Carbonara', price: 18.50, category: 'Mains' },
-    { id: 2, name: 'Grilled Salmon', price: 24.00, category: 'Mains' },
-    { id: 3, name: 'Caesar Salad', price: 12.00, category: 'Appetizers' },
-    { id: 4, name: 'Diet Coke', price: 3.50, category: 'Drinks' },
-    { id: 5, name: 'Cheesecake', price: 9.00, category: 'Desserts' }
-];
-const handleSubmit = (e) => {
-        e.preventDefault();
-        if (!selectedItem|| !quantity|| !table)
-        {
-            return;
-        }
+useEffect(() => {
+        const fetchTables = async () => {
+            setLoading(true);
+            try {
+                const tablesResponse = await fetch('http://localhost:3001/api/tables');
+                const tablesData = await tablesResponse.json();
+                 setTables(tablesData);
 
-    
-const newItem = {
-            id: Date.now(), 
-            name: selectedItem,
-            quantity: Number(quantity), 
-            table: table,
-            notes: notes,
+                 const menuItemsResponse = await fetch('http://localhost:3001/api/menu_items');
+                 const menuItemsData = await menuItemsResponse.json();
+                setMenuItems(menuItemsData);
+
+              // console.log('API Data for Menu Items:', menuItemsData);
+
+            } catch (err) {
+                setError('Failed to load data. Please refresh the page.');
+                console.error(err);
+                
+            
+            } finally {
+                
+                setLoading(false);
+            }
         };
 
-        
-        setOrderItems(prevItems => [...prevItems, newItem]);
+        fetchTables();
+    }, []);
+  
 
-       
-        setSelectedItem("");
-        setQuantity(1);
-        setTable("");
-        setNotes("");
+        const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (!selectedItem|| !quantity|| !table){
+            alert("Please fill in all fields");
+            return;
+        }
+         
 
-};
+        const menuItem = menuItems.find(item => item.name === selectedItem);
+        if (!menuItem) return; 
+
+        const newOrderItemData = {
+            item_id: menuItem.item_id,
+            table_id: Number(table),
+            quantity: Number(quantity),
+            special_requests: notes
+        };
+
+         try {
+            const ordersResponse = await fetch("http://localhost:3001/api/orders", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(newOrderItemData),
+            });
+            
+
+       const itemForDisplay = Object.assign({}, newOrderItemData);
+   
+    itemForDisplay.name = selectedItem;
+    itemForDisplay.id = Date.now(); 
+    itemForDisplay.table = table;
+    itemForDisplay.notes = notes;
+
+  
+    setOrderItems(prevItems => prevItems.concat(itemForDisplay));
+
+    
+    setSelectedItem("");
+    setQuantity(1);
+    setTable("");
+    setNotes("");
+
+} catch (err) {
+
+    alert("Failed to save the order item. Please try again.");
+    console.error(err);
+}
+        }
          return (
             <div className="container mx-auto p-8">
             <h1 className="text-4xl font-bold mb-6 text-center">Create New Order</h1>
@@ -63,8 +102,8 @@ const newItem = {
             onChange={(e) => setSelectedItem(e.target.value)}
             >
              <option value="" disabled>Select an item...</option> {}
-            {mockMenuItems.map(item => (
-            <option key={item.id} value={item.name}>
+            {menuItems.map(item => (
+            <option key={item.item_id} value={item.name}>
             {item.name}
              </option>
             ))}
@@ -76,9 +115,9 @@ const newItem = {
             onChange={(e) => setTable(e.target.value)}
             >
             <option value="" disabled>Select a table...</option>
-            {tables.map(table => (
-            <option key={table.id} value={table.number}>
-            Table {table.number}
+            {tables.map(t => (
+            <option key={t.table_id} value={t.table_id}>
+            Table {t.table_id}
             </option>
             ))}
             

@@ -1,20 +1,40 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import CreateOrder from './CreateOrder'; 
 import TableCard from '../components/common/TableCard';
 
+
 export const PageWaiter = () => {
-    const tables = [
-        { id: 1, number: 1, status: 'Empty' },
-        { id: 2, number: 2, status: 'In progress' },
-        { id: 3, number: 3, status: 'Done' },
-        { id: 4, number: 4, status: 'Empty' },
-        { id: 5, number: 5, status: 'In progress' },
-        { id: 6, number: 6, status: 'Done' },
-        { id: 7, number: 7, status: 'Empty' },
-        { id: 8, number: 8, status: 'Empty' },
-        { id: 9, number: 9, status: 'Empty' },
-        { id: 10, number: 10, status: 'In progress' },
-    ];
+    
+    const [tables, setTables] = useState([]);
+    const [menuItems, setMenuItems] = useState([]);
+    const [order, setOrder] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    //API Calls
+ useEffect(() => {
+        const fetchTables = async () => {
+            try {
+                const tablesResponse = await fetch('http://localhost:3001/api/tables');
+                const tablesData = await tablesResponse.json();
+                 setTables(tablesData);
+               
+
+            } catch (err) {
+                setError('Failed to load data. Please refresh the page.');
+                console.error(err);
+                
+            
+            } finally {
+                
+                setLoading(false);
+            }
+        };
+
+        fetchTables();
+    }, []);
+  
 
     return (
         <div className="container mx-auto p-4">
@@ -29,11 +49,11 @@ export const PageWaiter = () => {
 
             {}
             <div className="grid max-w-6xl mx-auto grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-16">
-                {tables.map(table => (
+                {tables.map(tables => (
                     <TableCard 
-                        key={table.id}
-                        tableNumber={table.number} 
-                        status={table.status} 
+                        key={tables.table_id}
+                        tableNumber={tables.table_number} 
+                        status={tables.status} 
                     />
                 ))}
             </div>
