@@ -33,9 +33,8 @@ export const PageHost = () => {
 
         const currentUser = workersData.find(w => w.email === user.user_metadata.email);
 
-        //Check if host or admin
-        //Host is 2?
-        if (currentUser && (currentUser.role_id === 2 || currentUser.role_id === 6)) {
+
+        if (currentUser && (currentUser.role_id === 1 || currentUser.role_id === 6)) {
           setAuthorized(true);
           setHostName(currentUser.first_name + " " + currentUser.last_name);
 

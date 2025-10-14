@@ -19,6 +19,7 @@ const Navbar = () => {
     
     //Check if metadata exists
     if (!user) {
+      console.log("NO USER");
       return;
     }
 

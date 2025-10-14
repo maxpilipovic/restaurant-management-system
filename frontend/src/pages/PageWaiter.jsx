@@ -65,7 +65,6 @@ export const PageWaiter = () => {
                 
             
             } finally {
-                
                 setLoading(false);
             }
         };
