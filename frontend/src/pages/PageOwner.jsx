@@ -5,6 +5,7 @@ import MenuList from "../components/common/MenuList";
 import { useAuth } from "../contexts/AuthContext";
 import LoadingPage from "../common/loadingPage";
 import ErrorPage from "../common/errorPage";
+import Reports from '../components/common/Reports';
 
 export const PageOwner = () => {
 
@@ -13,6 +14,11 @@ export const PageOwner = () => {
   const [hostName, setHostName] = useState("");
   const [workers, setWorkers] = useState([]);
   const [roles, setRoles] = useState([]);
+
+  //Stuff specifically for reports
+  const [payments, setPayments] = useState([]);
+  const [orderItems, setOrderItems] = useState([]);
+  const [menuItems, setMenuItems] = useState([]);
 
   useEffect(() => {
       
@@ -62,6 +68,66 @@ export const PageOwner = () => {
       };
   
       fetchRoles();
+    }, []);
+
+    //Get payments
+    useEffect(() => {
+      const fetchPayments = async () => {
+        try {
+          const response = await fetch('http://localhost:3001/api/getpayments');
+          const data = await response.json();
+          setPayments(data);
+        } catch (error) {
+          console.error("Error fetching payments:", error);
+        }
+      };
+  
+      fetchPayments();
+    }, []);
+
+    //Get order items
+    useEffect(() => {
+      const fetchOrderItems = async () => {
+        try {
+          const response = await fetch('http://localhost:3001/api/order-items');
+          const data = await response.json();
+          setOrderItems(data);
+        } catch (error) {
+          console.error("Error fetching order items:", error);
+        }
+      };
+  
+      fetchOrderItems();
+    }, []);
+
+    //Get menu items
+    useEffect(() => {
+      const fetchMenuItems = async () => {
+        try {
+          const response = await fetch('http://localhost:3001/api/get_menu');
+          const data = await response.json();
+          setMenuItems(data);
+        } catch (error) {
+          console.error("Error fetching menu items:", error);
+        }
+      };
+  
+      fetchMenuItems();
+    }, []);
+
+    //Get order items
+    useEffect(() => {
+      const fetchOrderItems = async () => {
+        try {
+          const response = await fetch('http://localhost:3001/api/get_order_items');
+          const data = await response.json();
+          setOrderItems(data);
+        } catch (error) {
+          console.error("Error fetching order items:", error);
+        }
+      };
+  
+      fetchOrderItems();
     }, []);
 
      //API to FIRE a user... SAFELY DELETE USER
@@ -132,8 +198,13 @@ export const PageOwner = () => {
         removeWorker={removeWorker}
         updateWorkerRole={updateWorkerRole}
       />
-
+      {/* Reports Section */}
       <h1 className="text-3xl font-bold mt-8">Reports</h1>
+      <Reports 
+        payments={payments}
+        orderItems={orderItems}
+        menuItems={menuItems}
+      />
     </div>
   );
 };

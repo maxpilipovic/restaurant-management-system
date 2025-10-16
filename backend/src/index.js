@@ -187,7 +187,7 @@ app.post('/api/menu', async (req, res) => {
   }
 });
 
-app.get('/api/menu', async (req, res) => {
+app.get('/api/get_menu', async (req, res) => {
   try {
     const { data, error } = await supabase.from('menu_items').select('*');
     if (error) {
@@ -263,7 +263,7 @@ app.post('/api/order_items', async (req, res) => {
   }
 });
 
-app.get('/api/order_items', async (req, res) => {
+app.get('/api/get_order_items', async (req, res) => {
   try {
     const { data, error } = await supabase.from('order_items').select('*');
     if (error) {
