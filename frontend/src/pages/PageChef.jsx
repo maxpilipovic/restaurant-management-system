@@ -53,12 +53,12 @@ export const PageChef = () => {
         const ordersResponse = await fetch('http://localhost:3001/api/orders');
         const ordersData = await ordersResponse.json();
 
-        const orderItemsResponse = await fetch('http://localhost:3001/api/order_items');
+        const orderItemsResponse = await fetch('http://localhost:3001/api/get_order_items');
         const orderItemsData = await orderItemsResponse.json();
         
 
         // ADD THIS: Fetch menu items
-        const menuItemsResponse = await fetch('http://localhost:3001/api/menu_items');
+        const menuItemsResponse = await fetch('http://localhost:3001/api/get_menu');
         const menuItemsData = await menuItemsResponse.json();
 
         //Transform the data
