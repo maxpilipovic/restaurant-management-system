@@ -501,3 +501,39 @@ app.put('/api/menu_items/:id/change', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
+//PAYMENTS POST TABLE
+app.post('/api/payments', async (req, res) => {
+  const { order_id, payment_method, amount, payment_time } = req.body;
+
+  try {
+    const { data, error } = await supabase
+      .from('payments')
+      .insert([{ order_id, payment_method, amount, payment_time }])
+      .select();
+
+    if (error) {
+      return res.status(500).json({ error: 'Failed to add payment data' });
+    }
+
+    res.json(data);
+  } catch (error) {
+    console.error(error);
+    console.log("Error inserting payment data");
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+//GET PAYMENTS
+app.get('/api/getpayments', async (req, res) => {
+  try {
+    const { data, error } = await supabase.from('payments').select('*');
+    if (error) {
+      return res.status(500).json({ error: 'Failed to fetch payments' });
+    }
+    res.json(data);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});

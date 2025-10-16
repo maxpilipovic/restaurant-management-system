@@ -1,7 +1,65 @@
 import React from "react";
 
-const TableList = ({ tables, workers, assignTable }) => {
+const TableList = ({ tables, workers, orders, assignTable }) => {
   //const waiters = workers.filter((w) => w.role === "Waiter");
+
+  //FIX THIS WITH TOAST NOTIFICATIONS INSTEAD OF ALERTS!!!
+  const handlePayment = async (table) => {
+    // Logic to handle payment
+
+    //Find other orders for the table
+    const order = orders.find(
+      (o) => o.table_id === table.table_id && table.status === "Occupied"
+    )
+
+    if (!order) {
+      alert("No order with this table");
+    }
+
+    const generateRandomId = (length = 6) => {
+      return Math.random().toString(36).substring(2, length + 2);
+    };
+    //If it exists, proceed with payment post request.
+
+    try {
+      const response = await fetch(`http://localhost:3001/api/payments`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          order_id: order.order_id,
+          payment_method: 'Credit Card',
+          amount: 100,
+          payment_time: new Date().toISOString(),
+        }),
+      });
+
+      if (!response.ok) {
+        alert("Error processing payment");
+      }
+
+      //Update table status to Open
+      const tableResponse = await fetch(`http://localhost:3001/api/tables/${table.table_id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "Open" }),
+      });
+
+      if (!tableResponse.ok) {
+        alert("Error updating table status");
+      }
+
+      if (response.ok && tableResponse.ok)
+      {
+        alert("Payment successful!");
+      }
+
+    } catch (error) {
+      console.error("Error processing payment:", error);
+    }
+  };
+
 
   return (
     <section className="mb-10">
@@ -32,6 +90,11 @@ const TableList = ({ tables, workers, assignTable }) => {
                 </option>
               ))}
             </select>
+            <button className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+              onClick={() => handlePayment(t)}
+            >
+              Pay
+            </button>
           </div>
         ))}
       </div>
