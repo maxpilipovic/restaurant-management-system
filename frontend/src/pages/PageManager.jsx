@@ -15,6 +15,7 @@ export const PageManager = () => {
   const [roles, setRoles] = useState([]);
   const [hostName, setHostName] = useState("");
   const [authorized, setAuthorized] = useState(null);
+  const [orders, setOrders] = useState([]);
 
   //Auth
   const { user,loading } = useAuth();
@@ -71,6 +72,19 @@ export const PageManager = () => {
       }
     };
     fetchRoles();
+  }, []);
+
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        const response = await fetch('http://localhost:3001/api/orders');
+        const data = await response.json();
+        setOrders(data);
+      } catch (error) {
+        console.error('Error fetching orders for manager page', error);
+      }
+    };
+    fetchOrders();
   }, []);
 
   //Grab menu items
@@ -242,6 +256,7 @@ export const PageManager = () => {
       <TableList
         tables={tables}
         workers={workers}
+        orders={orders}
         assignTable={assignTable}
       />
 
