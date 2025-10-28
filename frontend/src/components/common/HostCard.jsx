@@ -8,28 +8,42 @@ export const HostCard = ({ table, workers, updateStatus }  ) => {
   }
 
   return (
-    <div className="bg-white shadow-lg rounded-2xl p-4 flex flex-col justify-between">
-      <div>
-        <h2 className="text-xl font-bold mb-2">Table {table.table_id}</h2>
-        <p
-          className={`font-semibold mb-3 ${
-            table.status === "Open"
-              ? "text-green-500"
-              : "text-red-600"
-          }`}
-        >
-          Status: {table.status}
-        </p>
-        <p>
-          Assigned:{" "}
+    <div
+      className={`p-6 border rounded-xl shadow-sm text-center transition-all duration-200 ${
+        table.status === "Open"
+          ? "bg-green-50 hover:shadow-md"
+          : "bg-red-50 hover:shadow-md"
+      }`}
+    >
+      <h3 className="text-xl font-semibold text-gray-800 mb-2">
+        Table {table.table_number}
+      </h3>
+
+      <p
+        className={`text-sm font-medium mb-3 ${
+          table.status === "Open" ? "text-green-600" : "text-red-600"
+        }`}
+      >
+        Status: {table.status}
+      </p>
+
+      <p className="text-gray-700 mb-4">
+        Assigned:{" "}
+        <span className="font-medium">
           {table.assigned_waiter_id
-            ? workers.find((w) => w.user_id === table.assigned_waiter_id)?.first_name
+            ? workers.find(
+                (w) => w.user_id === table.assigned_waiter_id
+              )?.first_name
             : "None"}
-        </p>
-        <button className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-2 rounded-lg font-medium" onClick={toggleStatus}>
-          Change Status
-        </button>
-      </div>
+        </span>
+      </p>
+
+      <button
+        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-all"
+        onClick={toggleStatus}
+      >
+        Change Status
+      </button>
     </div>
   );
 };

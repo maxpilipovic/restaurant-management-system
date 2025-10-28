@@ -3,6 +3,7 @@ import ChefCard from "../components/common/ChefCard";
 import { useAuth } from "../contexts/AuthContext";
 import LoadingPage from "../common/loadingPage";
 import ErrorPage from "../common/errorPage";
+import Tabs from "../components/layout/Tabs";
 
 export const PageChef = () => {
   const [orders, setOrders] = useState([]);
@@ -127,16 +128,26 @@ export const PageChef = () => {
           Welcome, {hostName}
         </h1>
       </div>
-      <h1 className="text-3xl font-bold mb-6">Orders</h1>
-      <div className="grid grid-cols-5 gap-6">
-        {orders.map((order) => (
-          <ChefCard
-            key={order.id}
-            order={order}
-            onUpdateStatus={updateStatus}
-          />
-        ))}
-      </div>
+      <h1 className="text-2xl font-bold mb-6">Orders</h1>
+
+      <Tabs
+        children={[
+          {
+            label: "Users",
+            content: (
+              <div className="grid grid-cols-5 gap-6">
+                {orders.map((order) => (
+                  <ChefCard
+                    key={order.id}
+                    order={order}
+                    onUpdateStatus={updateStatus}
+                  />
+                ))}
+              </div>
+            )
+          },
+        ]}
+      />
     </div>
   );
 };
