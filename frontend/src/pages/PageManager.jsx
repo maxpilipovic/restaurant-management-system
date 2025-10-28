@@ -5,7 +5,7 @@ import TableList from "../components/common/TableList";
 import { useAuth } from "../contexts/AuthContext";
 import LoadingPage from "../common/loadingPage";
 import ErrorPage from "../common/errorPage";
-
+import Tabs from "../components/layout/Tabs";
 //STILL HAVE TO CHECK ROLE ON EACH PAGE
 
 export const PageManager = () => {
@@ -243,31 +243,45 @@ export const PageManager = () => {
           Welcome, {hostName}
         </h1>
       </div>
-      <h1 className="text-3xl font-bold mb-6">Manager Dashboard</h1>
+      <h1 className="text-2xl font-bold mb-6">Manager Dashboard</h1>
 
-      {/* Workers Section */}
-      <WorkerList
-        workers={workers}
-        roles={roles}
-        removeWorker={removeWorker}
-        updateWorkerRole={updateWorkerRole}
+      <Tabs
+        children={[
+          {
+            label: "Workers",
+            content: (
+              <WorkerList
+                workers={workers}
+                roles={roles}
+                removeWorker={removeWorker}
+                updateWorkerRole={updateWorkerRole}
+              />
+            )
+          },
+          {
+            label: "Tables",
+            content: (
+              <TableList
+                tables={tables}
+                workers={workers}
+                orders={orders}
+                assignTable={assignTable}
+              />
+            )
+          },
+          {
+            label: "Menu",
+            content: (
+              <MenuList
+                menuItems={menuItems}
+                addMenuItem={addMenuItem}
+                removeMenuItem={removeMenuItem}
+                changePrice={changePrice}
+              />
+            )
+          }
+        ]}
       />
-      {/* Tables Section */}
-      <TableList
-        tables={tables}
-        workers={workers}
-        orders={orders}
-        assignTable={assignTable}
-      />
-
-      {/* Menu Section */}
-      <MenuList
-        menuItems={menuItems}
-        addMenuItem={addMenuItem}
-        removeMenuItem={removeMenuItem}
-        changePrice={changePrice}
-      />
-
     </div>
   );
 };
