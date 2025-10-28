@@ -9,7 +9,7 @@ const WorkerList = ({ workers, removeWorker, updateWorkerRole, roles }) => {
 
   return (
     <section className="mb-10">
-      <h2 className="font-bold mb-4">Workers</h2>
+      <h2 className="text-2xl font-semibold mb-4">Workers</h2>
 
       <ul>
         {workers.map((w) => (
