@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import HostCard from '../components/common/HostCard';
 import LoadingPage from '../common/loadingPage';
 import ErrorPage from '../common/errorPage';
+import Tabs from '../components/layout/Tabs';
 
 //STILL HAVE TO CHECK ROLE ON EACH PAGE
 
@@ -97,17 +98,26 @@ export const PageHost = () => {
         </h1>
       </div>
 
-      <h1 className="text-3xl font-bold mb-6">Tables</h1>
-      <div className="grid grid-cols-5 gap-x-12 gap-y-6">
-        {tables.map((table) => (
-          <HostCard
-            key={table.table_id}
-            table={table}
-            workers={workers}
-            updateStatus={updateStatus}
-          />
-        ))}
-      </div>
+      <h1 className="text-2xl font-bold mb-6">Tables</h1>
+      <Tabs
+        children={[
+          {
+            label: "Users",
+            content: (
+              <div className="grid grid-cols-5 gap-x-12 gap-y-6">
+                {tables.map((table) => (
+                  <HostCard
+                    key={table.table_id}
+                    table={table}
+                    workers={workers}
+                    updateStatus={updateStatus}
+                  />
+                ))}
+              </div>
+            )
+          },
+        ]}
+      />
     </div>
   );
 };

@@ -6,6 +6,7 @@ import { useAuth } from "../contexts/AuthContext";
 import LoadingPage from "../common/loadingPage";
 import ErrorPage from "../common/errorPage";
 import Reports from '../components/common/Reports';
+import Tabs from '../components/layout/Tabs';
 
 export const PageOwner = () => {
 
@@ -189,21 +190,32 @@ export const PageOwner = () => {
           Welcome, {hostName}
         </h1>
       </div>
-      <h1 className="text-3xl font-bold mb-6">Owner Dashboard</h1>
+      <h1 className="text-2xl font-bold mb-6">Owner Dashboard</h1>
 
-      {/* Workers Section */}
-      <WorkerList
-        workers={workers}
-        roles={roles}
-        removeWorker={removeWorker}
-        updateWorkerRole={updateWorkerRole}
-      />
-      {/* Reports Section */}
-      <h1 className="text-3xl font-bold mt-8">Reports</h1>
-      <Reports 
-        payments={payments}
-        orderItems={orderItems}
-        menuItems={menuItems}
+      <Tabs
+        children={[
+          {
+            label: "Workers",
+            content: (
+              <WorkerList
+                workers={workers}
+                roles={roles}
+                removeWorker={removeWorker}
+                updateWorkerRole={updateWorkerRole}
+              />
+            )
+          },
+          {
+            label: "Reports",
+            content: (
+              <Reports 
+                payments={payments}
+                orderItems={orderItems}
+                menuItems={menuItems}
+              />
+            )
+          },
+        ]}
       />
     </div>
   );

@@ -6,6 +6,7 @@ import AdminOrders from '../AdminComponents/AdminOrders.jsx';
 import AdminMenuItems from '../AdminComponents/AdminMenuItems.jsx';
 import LoadingPage from '../common/loadingPage';
 import ErrorPage from '../common/errorPage';
+import Tabs from '../components/layout/Tabs.jsx';
 
 //STILL HAVE TO CHECK ROLE ON EACH PAGE
 
@@ -83,12 +84,45 @@ export const PageAdmin = () => {
           Welcome, {hostName}
         </h1>
       </div>
-      <h1 className="text-4xl font-bold text-blue-700 mb-6">Admin Dashboard</h1>
+      <h1 className="text-2xl font-bold text-blue-700 mb-6">Admin Dashboard</h1>
 
-      <AdminUsers users={users} roles={roles} />
-      <AdminTables tables={tables} />
-      <AdminOrders orders={orders} />
-      <AdminMenuItems menuItems={menuItems} />
+      <Tabs
+        children={[
+          {
+            label: "Users",
+            content: (
+              <AdminUsers 
+                users={users} 
+                roles={roles} 
+              />
+            )
+          },
+          {
+            label: "Tables",
+            content: (
+              <AdminTables 
+                tables={tables} 
+              />
+            )
+          },
+          {
+            label: "Orders",
+            content: (
+              <AdminOrders 
+                orders={orders} 
+              />
+            )
+          },
+          {
+            label: "Menu",
+            content: (
+              <AdminMenuItems 
+                menuItems={menuItems} 
+              />
+            )
+          }
+        ]}
+      />
     </div>
   );
 };
