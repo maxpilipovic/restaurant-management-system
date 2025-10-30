@@ -32,7 +32,7 @@ const Navbar = () => {
 
         //Check if host or admin
         //Host is 2?
-        if (currentUser || currentUser.role_id === 6) {
+        if (currentUser && currentUser.role_id === 6) {
           setIsAdmin(true);
 
         }
@@ -76,7 +76,7 @@ const Navbar = () => {
     );
   }
 
-  // AI GENERATED A NEW NAVBAR FOR ADMINS.
+  //AI GENERATED A NEW NAVBAR FOR ADMINS.
   if (isAdmin) {
     return (
       <nav className="bg-gradient-to-r from-blue-600 to-indigo-700 shadow-lg border-b border-blue-800">
