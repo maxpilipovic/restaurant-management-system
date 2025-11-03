@@ -128,6 +128,7 @@ app.post('/api/users', async (req, res) => {
 app.post('/api/tables', async (req, res) => {
 
   const { table_number, status, assigned_waiter_id } = req.body;
+  console.log(req.body);
 
   try {
     const { data, error } = await supabase
@@ -349,7 +350,7 @@ app.get('/api/roles', async (req, res) => {
   }
 });
 
-//PUT to update worker role
+//PUT to updat role
 app.put('/api/users/:id/role', async (req, res) => {
   const { id } = req.params;
   const { role_id } = req.body;

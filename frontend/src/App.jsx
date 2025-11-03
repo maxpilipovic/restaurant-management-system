@@ -36,7 +36,7 @@ function App() {
         <Route path="/waiter" element={<PageWaiter />} />
         <Route path="/manager" element={<PageManager />} />
         <Route path="/owner" element={<PageOwner />} />
-        <Route path="/create-order" element={<CreateOrder />} /> 
+        <Route path="/create-order/:tableId" element={<CreateOrder />} /> 
       </Routes>
     </AuthProvider>
       {/* import toast container */}
