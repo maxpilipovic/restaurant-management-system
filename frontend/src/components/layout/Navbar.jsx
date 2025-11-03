@@ -122,7 +122,7 @@ const Navbar = () => {
 
   // ---------- NON-ADMIN NAVBAR ----------
   return (
-    <nav className="bg-gray-100 border-b shadow-sm">
+    <nav className="bg-gradient-to-r from-blue-600 to-indigo-700 shadow-lg border-b border-blue-800">
       <div className="max-w-6xl mx-auto px-6 py-4 flex justify-center">
         <button
           onClick={handleSignOut}
