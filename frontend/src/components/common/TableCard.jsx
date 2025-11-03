@@ -6,12 +6,12 @@ const TableCard = ({ tableNumber, status }) => {
     
     const getStatusStyles = () => {
         switch (status) {
-            case 'Empty':
+            case 'Open':
                 return 'bg-green-500 text-white'; 
-            case 'In progress':
+            case 'Occupied':
                 return 'bg-yellow-400 text-black'; 
-            case 'Done':
-                return 'bg-cyan-500 text-white'; 
+            case 'In progress':
+                return 'bg-cyan-400 text-black'; 
             default:
                 return 'bg-gray-400 text-white'; 
         }
