@@ -4,14 +4,14 @@ import CreateOrder from './CreateOrder';
 import TableCard from '../components/common/TableCard';
 import { useAuth } from '../contexts/AuthContext';
 import AdminUsers from '../AdminComponents/AdminUsers.jsx';
+import LoadingPage from '../common/loadingPage.jsx';
+import ErrorPage from '../common/errorPage.jsx';
 
 
 export const PageWaiter = () => {
     const { user, signOut } = useAuth();
     
     const [tables, setTables] = useState([]);
-    const [menuItems, setMenuItems] = useState([]);
-    const [order, setOrder] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const[authorized, setAuthorized] = useState(null);
@@ -29,11 +29,11 @@ export const PageWaiter = () => {
                 const usersResponse = await fetch('http://localhost:3001/api/users');
                 const usersData = await usersResponse.json();
 
-                  console.log("Looking for this email:", user.email);
+                //console.log("Looking for this email:", user.email);
                 const currentUser = usersData.find(u => u.email === user.email);
-             console.log("Found this user in database:", currentUser);
+                //console.log("Found this user in database:", currentUser);
             
-                if (currentUser && currentUser.role_id === 2) { 
+                if (currentUser && (currentUser.role_id === 2 || currentUser.role_id === 6)) { 
                     setAuthorized(true);
                 } else {
                     setAuthorized(false);
@@ -51,32 +51,33 @@ export const PageWaiter = () => {
 
 
     //API Calls
- useEffect(() => {
+    useEffect(() => {
         const fetchTables = async () => {
             try {
                 const tablesResponse = await fetch('http://localhost:3001/api/tables');
                 const tablesData = await tablesResponse.json();
-                 setTables(tablesData);
+                setTables(tablesData);
             }
-            
+                
             catch (err) {
                 setError('Failed to load data. Please refresh the page.');
                 console.error(err);
+                    
                 
-            
             } finally {
                 setLoading(false);
-            }
-        };
+                }
+            };
 
         fetchTables();
     }, []);
     
     if (loading) {
-        return <div>Loading...</div>;
+        return <LoadingPage />;
     }
+
     if (!authorized) {
-        return <div>Access Denied. You must be a waiter to see this page.</div>;
+        return <ErrorPage message="You are not authorized to view this page." />;
     }
     return (
         <div className="container mx-auto p-4">
