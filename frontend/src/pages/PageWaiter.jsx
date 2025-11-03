@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import CreateOrder from './CreateOrder'; 
 import TableCard from '../components/common/TableCard';
 import { useAuth } from '../contexts/AuthContext';
-import AdminUsers from '../AdminComponents/AdminUsers.jsx';
 import LoadingPage from '../common/loadingPage.jsx';
 import ErrorPage from '../common/errorPage.jsx';
+import Tabs from '../components/layout/Tabs.jsx';
 
 
 export const PageWaiter = () => {
     const { user, signOut } = useAuth();
-    
+    const [hostName, setHostName] = useState("");
     const [tables, setTables] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -19,7 +18,7 @@ export const PageWaiter = () => {
     useEffect(() => {
         const checkAccess = async () => {
             if (!user) {
-                console.log(user);
+                //console.log(user);
                 setAuthorized(false);
                 setLoading(false);
                 return;
@@ -34,6 +33,7 @@ export const PageWaiter = () => {
                 //console.log("Found this user in database:", currentUser);
             
                 if (currentUser && (currentUser.role_id === 2 || currentUser.role_id === 6)) { 
+                    setHostName(currentUser.first_name + " " + currentUser.last_name);
                     setAuthorized(true);
                 } else {
                     setAuthorized(false);
@@ -79,23 +79,36 @@ export const PageWaiter = () => {
     if (!authorized) {
         return <ErrorPage message="You are not authorized to view this page." />;
     }
-    return (
-        <div className="container mx-auto p-4">
-            <div className="flex flex-col items-center mb-8">
-                <h1 className="text-4xl font-bold mb-4">Waiter Dashboard</h1>
-            </div>
 
-            {}
-            <div className="grid max-w-6xl mx-auto grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-16">
-                {tables.map(tables => (
-                  <Link key={tables.table_id} to={`/create-order/${tables.table_id}`}>
-                    <TableCard 
-                    tableNumber={tables.table_number} 
-                    status={tables.status} 
-                     />
-                </Link>
-                ))}
+    return (
+        <div className="p-6">
+            <div className="flex justify-between items-center mb-6">
+                <h1 className="text-3xl font-bold">
+                Welcome, {hostName}
+                </h1>
             </div>
+            
+            <h1 className="text-2xl font-bold mb-6">Waiter Dashboard</h1>
+
+            <Tabs
+            children={[
+                {
+                label: "Tables",
+                content: (
+                    <div className="grid max-w-6xl mx-auto grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-16">
+                    {tables.map((table) => (
+                        <Link key={table.table_id} to={`/create-order/${table.table_id}`}>
+                        <TableCard
+                            tableNumber={table.table_number}
+                            status={table.status}
+                        />
+                        </Link>
+                    ))}
+                    </div>
+                ),
+                },
+            ]}
+            />
         </div>
     );
 }

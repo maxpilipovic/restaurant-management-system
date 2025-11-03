@@ -20,12 +20,13 @@ import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
   const location = useLocation();
-  const showNavbar = location.pathname !== '/'; //Temp fix to hide navbar on login page
+  const showNavbar = location.pathname !== '/'; //Does not display navbar on login page;
+  const showNavbar2 = location.pathname !== '/create-account'; //Does not display navbar on create account page;
 
   return (
     <>
      <AuthProvider>
-      {showNavbar && <Navbar />}
+      {showNavbar && showNavbar2 && <Navbar />}
       <Routes>
         <Route path="/" element={<LoginForm />} />
         <Route path="/create-account" element={<CreateAccount />} />
