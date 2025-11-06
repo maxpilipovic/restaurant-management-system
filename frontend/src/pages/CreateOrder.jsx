@@ -8,7 +8,8 @@ const CreateOrder = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const { tableId } = useParams();
-  const [editingId, setEditingId] = useState(null);
+ const [editingDrinkId, setEditingDrinkId] = useState(null);
+ const [editingFoodId, setEditingFoodId] = useState(null);
 
   const [selectedFood, setSelectedFood] = useState("");
   const [selectedDrink, setSelectedDrink] = useState("");
@@ -18,170 +19,297 @@ const CreateOrder = () => {
   const [drinkNotes, setDrinkNotes] = useState("");
   const [table, setTable] = useState(tableId || "");
   const [selectedFlavor, setSelectedFlavor] = useState("");
+  const [currentOrderId, setCurrentOrderId] = useState(null);
 
+  
 
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchTables = async () => {
+useEffect(() => {
+  const fetchData = async () => {
+    try {
       setLoading(true);
-      try {
-        const tablesResponse = await fetch("http://localhost:3001/api/tables");
-        const tablesData = await tablesResponse.json();
-        console.log("Tables data from API:", tablesData);
-        setTables(tablesData);
 
-        const menuItemsResponse = await fetch(
-          "http://localhost:3001/api/menu_items"
+      const [menuRes, tablesRes] = await Promise.all([
+        fetch("http://localhost:3001/api/menu_items"),
+        fetch("http://localhost:3001/api/tables"),
+      ]);
+
+      const menuData = await menuRes.json();
+      const tableData = await tablesRes.json();
+
+      setMenuItems(menuData);
+      setTables(tableData);
+    } catch (err) {
+      console.error("Failed to load menu or tables:", err);
+      setError("Failed to load data");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchData();
+}, []);
+
+useEffect(() => {
+  const initializeOrder = async () => {
+    try {
+      // Fetch all existing orders
+      const checkRes = await fetch("http://localhost:3001/api/orders");
+      const allOrders = await checkRes.json();
+
+      // See if there's already an open order for this table
+      const openOrder = allOrders.find(
+        (o) => o.table_id === Number(tableId) && o.order_status === "Open"
+      );
+
+      if (openOrder) {
+        // Reuse existing order instead of creating a new one
+        setCurrentOrderId(openOrder.order_id);
+        console.log("Reusing existing open order:", openOrder);
+
+        // Load existing order items for that order
+        const itemsRes = await fetch(
+          `http://localhost:3001/api/order_items/${openOrder.order_id}`
         );
-        const menuItemsData = await menuItemsResponse.json();
-        setMenuItems(menuItemsData);
+        const itemsData = await itemsRes.json();
+        setOrderItems(itemsData);
+      } else {
+        // Create a new one if no open order exists
+        const response = await fetch(
+          "http://localhost:3001/api/orders/create",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              table_id: Number(tableId),
+              waiter_id: 1, // later replace with logged-in waiter
+            }),
+          }
+        );
 
-        // console.log('API Data for Menu Items:', menuItemsData);
-      } catch (err) {
-        setError("Failed to load data. Please refresh the page.");
-        console.error(err);
-      } finally {
-        setLoading(false);
+        const data = await response.json();
+      setCurrentOrderId(data.order_id);
+        console.log("Created new order:", data[0]);
       }
-    };
+    } catch (error) {
+      console.error("Error initializing order:", error);
+    }
+  };
 
-    fetchTables();
-  }, []);
+  initializeOrder();
+}, [tableId]);
+
 
   const handleEdit = (id) => {
     const item = orderItems.find((i) => i.id === id);
     if (!item) return;
 
-    if (item.category === "Drink") {
+    if (item.category === "Drink" || item.category === "drink") {
       setSelectedDrink(item.name);
       setDrinkQuantity(item.quantity);
       setDrinkNotes(item.notes || "");
+      setEditingDrinkId(id);
+      setEditingFoodId(null); // ensure only drink edit mode is active
     } else {
       setSelectedFood(item.name);
       setFoodQuantity(item.quantity);
       setFoodNotes(item.notes || "");
+      setEditingFoodId(id);
+      setEditingDrinkId(null); // ensure only food edit mode is active
+    }
+  };
+
+  const handleRemove = async (id) => {
+    try {
+      await fetch(`http://localhost:3001/api/order_items/${id}`, {
+        method: "DELETE",
+      });
+      setOrderItems((prev) => prev.filter((i) => i.id !== id));
+    } catch (err) {
+      console.error("Error deleting item:", err);
+    }
+  };
+
+  const handleSubmitDrink = async (e) => {
+    
+    console.log("currentOrderId when submitting:", currentOrderId);
+    e.preventDefault();
+    if (!selectedDrink || !table) {
+      alert("Please select a drink item");
+      return;
     }
 
-    setEditingId(id);
+    const drinkItem = menuItems.find((item) => item.name === selectedDrink);
+    if (!drinkItem) return;
+
+    const newOrderItem = {
+      id: editingDrinkId || Date.now(),
+      name: drinkItem.name,
+      category: drinkItem.category,
+      table,
+      quantity: drinkQuantity,
+      notes: drinkNotes,
+    };
+
+    if (selectedDrink.toLowerCase().includes("soda") && selectedFlavor) {
+      newOrderItem.flavor = selectedFlavor;
+    }
+
+    try {
+      if (editingDrinkId) {
+        // EDIT EXISTING DRINK
+        await fetch(`http://localhost:3001/api/order_items/${editingDrinkId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            item_id: drinkItem.item_id,
+            quantity: Number(drinkQuantity),
+            special_requests: drinkNotes,
+          }),
+        });
+
+        // Update local React state instantly
+        setOrderItems((prev) =>
+          prev.map((i) =>
+            i.id === editingDrinkId
+              ? {
+                  ...i,
+                  item_id : drinkItem.item_id,
+                  quantity: Number(drinkQuantity),
+                  notes: drinkNotes,
+                  flavor: selectedFlavor || i.flavor,
+                }
+              : i
+          )
+        );
+
+        setEditingDrinkId(null);
+     } else {
+  const response = await fetch("http://localhost:3001/api/order_items", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      order_id: currentOrderId,
+      item_id: drinkItem.item_id,
+      quantity: Number(drinkQuantity),
+      special_requests: drinkNotes,
+    }),
+  });
+
+
+  if (response.ok) {
+    setOrderItems((prev) => [...prev, newOrderItem]);
+
+  } 
+  else {
+    console.error("Failed to add drink:", await response.text());
+  }
+      }
+
+      
+      setSelectedDrink("");
+      setDrinkQuantity(1);
+      setDrinkNotes("");
+      setSelectedFlavor("");
+    } catch (err) {
+      console.error("Error saving drink:", err);
+      alert("Failed to save drink item");
+    }
   };
 
+const handleSubmitFood = async (e) => {
+  e.preventDefault();
+  if (!selectedFood || !table) {
+    alert("Please select a food item");
+    return;
+  }
 
-  const handleRemove = (id) => {
-    setOrderItems((prev) => prev.filter((i) => i.id !== id));
+  const foodItem = menuItems.find((item) => item.name === selectedFood);
+  if (!foodItem) return;
+
+  const newOrderItem = {
+    id: editingFoodId || Date.now(),
+    name: foodItem.name,
+    category: foodItem.category,
+    table,
+    quantity: foodQuantity,
+    notes: foodNotes,
   };
-   const handleSubmitDrink = async (e) => {
-     e.preventDefault();
-     if (!selectedDrink || !table) {
-       alert("Please select a drink item");
-       return;
-     }
 
-     const drinkItem = menuItems.find((item) => item.name === selectedDrink);
-     if (!drinkItem) return;
+  const selectedItem = menuItems.find((i) => i.name === selectedFood);
+  if (
+    selectedItem &&
+    (selectedItem.name.toLowerCase().includes("burger") ||
+      selectedItem.name.toLowerCase().includes("steak"))
+  ) {
+    newOrderItem.cookLevel = selectedItem.cookLevel || "";
+  }
 
-     const newOrderItem = {
-       id: editingId || Date.now(),
-       name: drinkItem.name,
-       category: drinkItem.category,
-       table,
-       quantity: drinkQuantity,
-       notes: drinkNotes,
-     };
-     if (selectedDrink.toLowerCase().includes("soda") && selectedFlavor) {
-       newOrderItem.flavor = selectedFlavor;
-     }
+  try {
+    if (editingFoodId) {
+      // edit existing food item
+      await fetch(`http://localhost:3001/api/order_items/${editingFoodId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          item_id: foodItem.item_id,
+          quantity: Number(foodQuantity),
+          special_requests: foodNotes,
+        }),
+      });
 
-     try {
-       await fetch("http://localhost:3001/api/orders", {
-         method: "POST",
-         headers: { "Content-Type": "application/json" },
-         body: JSON.stringify({
-           item_id: drinkItem.item_id,
-           table_id: Number(table),
-           quantity: Number(drinkQuantity),
-           special_requests: drinkNotes,
-           flavor: selectedFlavor || null,
-         }),
-       });
+      //  update UI and reset edit mode
+      await fetchUpdatedOrderItems();
+      setEditingFoodId(null);
+      setSelectedFood("");
+      setFoodQuantity(1);
+      setFoodNotes("");
+      return; // exit early after editing
+    }
 
-       if (editingId) {
-         setOrderItems((prev) =>
-           prev.map((i) => (i.id === editingId ? newOrderItem : i))
-         );
-         setEditingId(null);
-       } else {
-         setOrderItems((prev) => [...prev, newOrderItem]);
-       }
+    // add new food item
+    const response = await fetch("http://localhost:3001/api/order_items", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        order_id: currentOrderId,
+        item_id: foodItem.item_id,
+        quantity: Number(foodQuantity),
+        special_requests: foodNotes,
+      }),
+    });
 
-       setSelectedDrink("");
-       setDrinkQuantity(1);
-       setDrinkNotes("");
-       setSelectedFlavor("");
-     } catch (err) {
-       console.error("Error adding drink:", err);
-       alert("Failed to save drink item");
-     }
-   };
-
-   const handleSubmitFood = async (e) => {
-     e.preventDefault();
-     if (!selectedFood || !table) {
-       alert("Please select a food item");
-       return;
-     }
-
-     const foodItem = menuItems.find((item) => item.name === selectedFood);
-     if (!foodItem) return;
-
-     const newOrderItem = {
-       id: editingId || Date.now(),
-       name: foodItem.name,
-       category: foodItem.category,
-       table,
-       quantity: foodQuantity,
-       notes: foodNotes,
-     };
-
-     const selectedItem = menuItems.find((i) => i.name === selectedFood);
-     if (
-       selectedItem &&
-       (selectedItem.name.toLowerCase().includes("burger") ||
-         selectedItem.name.toLowerCase().includes("steak"))
-     ) {
-       newOrderItem.cookLevel = selectedItem.cookLevel || "";
-     }
+    if (response.ok) {
+      await fetchUpdatedOrderItems();
+     
+      setSelectedFood("");
+      setFoodQuantity(1);
+      setFoodNotes("");
+      setEditingFoodId(null);
+    } else {
+      console.error("Failed to add food:", await response.text());
+    }
+  } catch (err) {
+    console.error("Error saving food:", err);
+    alert("Failed to save food item");
+  }
+};
 
 
-     try {
-       await fetch("http://localhost:3001/api/orders", {
-         method: "POST",
-         headers: { "Content-Type": "application/json" },
-         body: JSON.stringify({
-           item_id: foodItem.item_id,
-           table_id: Number(table),
-           quantity: Number(foodQuantity),
-           special_requests: foodNotes,
-         }),
-       });
 
-       if (editingId) {
-         setOrderItems((prev) =>
-           prev.map((i) => (i.id === editingId ? newOrderItem : i))
-         );
-         setEditingId(null);
-       } else {
-         setOrderItems((prev) => [...prev, newOrderItem]);
-       }
-
-       setSelectedFood("");
-       setFoodQuantity(1);
-       setFoodNotes("");
-     } catch (err) {
-       console.error("Error adding food:", err);
-       alert("Failed to save food item");
-     }
-   };
+const fetchUpdatedOrderItems = async () => {
+  try {
+    const res = await fetch(
+      `http://localhost:3001/api/order_items/${currentOrderId}`
+    );
+    if (!res.ok) throw new Error(`Fetch failed: ${res.status}`);
+    const data = await res.json();
+    setOrderItems(data);
+  } catch (err) {
+    console.error("Error reloading order items:", err);
+  }
+};
 
 
   return (
@@ -212,11 +340,11 @@ const CreateOrder = () => {
                 ))}
             </optgroup>
 
-            <optgroup label="Soda Flavors">
+            <optgroup label="Soda">
               {menuItems
                 .filter(
                   (item) =>
-                    item.category === "Drink" && item.name.includes("Soda")
+                    item.category === "drink"
                 )
                 .map((item) => (
                   <option key={item.item_id} value={item.name}>
@@ -225,37 +353,6 @@ const CreateOrder = () => {
                 ))}
             </optgroup>
           </select>
-          {selectedDrink.toLowerCase().includes("soda") && (
-            <select
-              value={selectedFlavor}
-              onChange={(e) => setSelectedFlavor(e.target.value)}
-              className="border p-1 rounded"
-            >
-              <option value="" disabled>
-                Select flavor...
-              </option>
-              <option value="Mana Mist">Mana Mist</option>
-              <option value="Health Tonic">Health Tonic</option>
-              <option value="Mountain Doom">Mountain Doom</option>
-              <option value="Red Ring Rush">Red Ring Rush</option>
-              <option value="Nuka Fizz">Nuka Fizz</option>
-              <option value="Hyper Potion Pop">Hyper Potion Pop</option>
-              <option value="Starman Sparkle">Starman Sparkle</option>
-              <option value="Turbo Cola">Turbo Cola</option>
-              <option value="8-Bit Berry Blast">8-Bit Berry Blast</option>
-              <option value="Respawn Root Beer">Respawn Root Beer</option>
-              <option value="Koopa Kola">Koopa Kola</option>
-              <option value="Final Fizzasy">Final Fizzasy</option>
-              <option value="Warp Pipe Watermelon">Warp Pipe Watermelon</option>
-              <option value="XP Elixir">XP Elixir</option>
-              <option value="Lag-Free Lemon-Lime">Lag-Free Lemon-Lime</option>
-              <option value="Dragonborn Drank">Dragonborn Drank</option>
-              <option value="Checkpoint Cherry">Checkpoint Cherry</option>
-              <option value="Glitch Grape">Glitch Grape</option>
-              <option value="Pixel Punch">Pixel Punch</option>
-              <option value="Overclock Orange">Overclock Orange</option>
-            </select>
-          )}
           <input
             type="number"
             min="1"
@@ -283,7 +380,7 @@ const CreateOrder = () => {
             type="submit"
             className="bg-blue-600 text-white px-4 py-2 rounded"
           >
-            {editingId ? "Save Changes" : "Add Drink"}
+            {editingDrinkId ? "Save Changes" : "Add Drink"}
           </button>
         </div>
       </form>
@@ -420,12 +517,12 @@ const CreateOrder = () => {
             type="submit"
             className="bg-green-600 text-white px-4 py-2 rounded"
           >
-            {editingId ? "Save Changes" : "Add Food"}
+            {editingFoodId ? "Save Changes" : "Add Food"}
           </button>
         </div>
       </form>
       <div className="mt-10">
-        <h2 className="text-3xl font-bold mb-4">Current Order</h2>
+        <h2 className="text-3xl font-bold mb-4">Current Order - Table {table}</h2>
         <div className="bg-white p-4 rounded-lg shadow-md">
           {orderItems.length === 0 ? (
             <p className="text-gray-500">No items have been added yet.</p>
@@ -436,8 +533,8 @@ const CreateOrder = () => {
                   <div className="flex justify-between items-center">
                     <div>
                       <p className="font-bold text-lg">
-                        {item.quantity} x {item.name} ({item.category}) - Table{" "}
-                        {item.table}
+                        {item.quantity} x {item.name} ({item.category}) 
+                        
                       </p>
                       {item.name.toLowerCase().includes("soda") &&
                         item.flavor && (
@@ -486,3 +583,4 @@ const CreateOrder = () => {
 };
 
 export default CreateOrder;
+
