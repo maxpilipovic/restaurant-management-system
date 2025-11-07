@@ -128,6 +128,7 @@ app.post('/api/users', async (req, res) => {
 app.post('/api/tables', async (req, res) => {
 
   const { table_number, status, assigned_waiter_id } = req.body;
+  console.log(req.body);
 
   try {
     const { data, error } = await supabase
@@ -237,9 +238,11 @@ app.post('/api/orders', async (req, res) => {
 });
 
 //ORDER_ITEMS TABLE
+//This is to create orders
 app.post('/api/order_items', async (req, res) => {
 
   const { order_id, item_id, quantity, special_requests } = req.body;
+  console.log(req.body);
 
   try {
     const { data, error } = await supabase
@@ -260,6 +263,7 @@ app.post('/api/order_items', async (req, res) => {
     console.log("Error inserting order_item data");
     res.status(500).json({ error: 'Internal server error' });
   }
+  res.status(200).json({success:"Order item created successfully"});
 });
 
 app.get('/api/get_order_items', async (req, res) => {
@@ -274,6 +278,30 @@ app.get('/api/get_order_items', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
+// DELETE ORDER ITEM
+app.delete('/api/order_items/:id', async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const { data, error } = await supabase
+      .from('order_items')
+      .delete()
+      .eq('order_item_id', id)
+      .select();
+
+    if (error) {
+      console.error("Supabase delete error:", error);
+      return res.status(500).json({ error: 'Failed to delete order item' });
+    }
+
+    res.json({ message: 'Order item deleted successfully', data });
+  } catch (error) {
+    console.error("Error deleting order item:", error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 
 //PATCH route to update order status
 app.patch('/api/orders/:id', async (req, res) => {
@@ -349,7 +377,7 @@ app.get('/api/roles', async (req, res) => {
   }
 });
 
-//PUT to update worker role
+//PUT to updat role
 app.put('/api/users/:id/role', async (req, res) => {
   const { id } = req.params;
   const { role_id } = req.body;
