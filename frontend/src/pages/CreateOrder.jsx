@@ -105,7 +105,7 @@ useEffect(() => {
     const item = orderItems.find((i) => i.id === id);
     if (!item) return;
 
-    if (item.category === "Drink" || item.category === "drink") {
+    if (item.category === "Drink") {
       setSelectedDrink(item.name);
       setDrinkQuantity(item.quantity);
       setDrinkNotes(item.notes || "");
@@ -132,8 +132,6 @@ useEffect(() => {
   };
 
   const handleSubmitDrink = async (e) => {
-    
-    console.log("currentOrderId when submitting:", currentOrderId);
     e.preventDefault();
     if (!selectedDrink || !table) {
       alert("Please select a drink item");
@@ -152,13 +150,9 @@ useEffect(() => {
       notes: drinkNotes,
     };
 
-    if (selectedDrink.toLowerCase().includes("soda") && selectedFlavor) {
-      newOrderItem.flavor = selectedFlavor;
-    }
-
     try {
       if (editingDrinkId) {
-        // EDIT EXISTING DRINK
+        // edit existing drink item
         await fetch(`http://localhost:3001/api/order_items/${editingDrinkId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -169,54 +163,43 @@ useEffect(() => {
           }),
         });
 
-        // Update local React state instantly
-        setOrderItems((prev) =>
-          prev.map((i) =>
-            i.id === editingDrinkId
-              ? {
-                  ...i,
-                  item_id : drinkItem.item_id,
-                  quantity: Number(drinkQuantity),
-                  notes: drinkNotes,
-                  flavor: selectedFlavor || i.flavor,
-                }
-              : i
-          )
-        );
-
+        //  update UI and reset edit mode
+        await fetchUpdatedOrderItems();
         setEditingDrinkId(null);
-     } else {
-  const response = await fetch("http://localhost:3001/api/order_items", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      order_id: currentOrderId,
-      item_id: drinkItem.item_id,
-      quantity: Number(drinkQuantity),
-      special_requests: drinkNotes,
-    }),
-  });
-
-
-  if (response.ok) {
-    setOrderItems((prev) => [...prev, newOrderItem]);
-
-  } 
-  else {
-    console.error("Failed to add drink:", await response.text());
-  }
+        setSelectedDrink("");
+        setDrinkQuantity(1);
+        setDrinkNotes("");
+        return; // exit early after editing
       }
 
-      
-      setSelectedDrink("");
-      setDrinkQuantity(1);
-      setDrinkNotes("");
-      setSelectedFlavor("");
+      // add new food item
+      const response = await fetch("http://localhost:3001/api/order_items", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          order_id: currentOrderId,
+          item_id: drinkItem.item_id,
+          quantity: Number(drinkQuantity),
+          special_requests: drinkNotes,
+        }),
+      });
+
+      if (response.ok) {
+        await fetchUpdatedOrderItems();
+
+        setSelectedDrink("");
+        setDrinkQuantity(1);
+        setDrinkNotes("");
+        setEditingDrinkId(null);
+      } else {
+        console.error("Failed to add drink:", await response.text());
+      }
     } catch (err) {
       console.error("Error saving drink:", err);
       alert("Failed to save drink item");
     }
   };
+
 
 const handleSubmitFood = async (e) => {
   e.preventDefault();
@@ -344,7 +327,7 @@ const fetchUpdatedOrderItems = async () => {
               {menuItems
                 .filter(
                   (item) =>
-                    item.category === "drink"
+                    item.category === "Drink" && item.name.includes("Soda")
                 )
                 .map((item) => (
                   <option key={item.item_id} value={item.name}>
