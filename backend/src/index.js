@@ -214,6 +214,20 @@ app.get('/api/orders', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+//PUT ORDERS 
+app.put('/api/orders/:order_id', async (req, res) => {
+  const { order_id } = req.params;
+  const { order_status, total_amount, tip_amount } = req.body;
+
+  const { data, error } = await supabase
+    .from('orders')
+    .update({ order_status, total_amount, tip_amount })
+    .eq('order_id', order_id)
+    .select();
+
+  if (error) throw error;
+  res.json({ success: true, data });
+});
 
 //ORDERS TABLE
 app.post('/api/orders', async (req, res) => {
@@ -620,11 +634,13 @@ app.put('/api/order_items/:id', async (req, res) => {
   }
 });
 
-// GET order items by order_id (with menu item details)
+// GET order items by order_id (with menu item details)// GET order items by order_id (with menu item details)
 app.get('/api/order_items/:order_id', async (req, res) => {
   const { order_id } = req.params;
+
   try {
-    console.log('Fetching items for some reason');
+    console.log('Fetching items for order:', order_id);
+
     const { data, error } = await supabase
       .from('order_items')
       .select(`
@@ -635,25 +651,28 @@ app.get('/api/order_items/:order_id', async (req, res) => {
         special_requests,
         menu_items (
           name,
-          category
+          category,
+          price
         )
       `)
       .eq('order_id', order_id);
 
     if (error) throw error;
 
-    // Flatten the nested menu_items field so the frontend gets simple keys
-    const formatted = data.map(item => ({
+    // Build clean response for frontend
+    const itemsWithSubtotal = data.map(item => ({
       id: item.order_item_id,
       name: item.menu_items?.name || 'Unknown',
       category: item.menu_items?.category || 'Uncategorized',
       quantity: item.quantity,
       notes: item.special_requests || '',
+      price: item.menu_items?.price || 0,
+      subtotal: (item.menu_items?.price || 0) * item.quantity,
     }));
 
-    res.json(formatted);
-  } catch (error) {
-    console.error('Error fetching order items:', error);
+    res.json(itemsWithSubtotal);
+  } catch (err) {
+    console.error('Error fetching order items:', err);
     res.status(500).json({ error: 'Failed to fetch order items' });
   }
 });

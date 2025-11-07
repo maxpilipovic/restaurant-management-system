@@ -10,6 +10,7 @@ import PageWaiter from './pages/PageWaiter';
 import Home from './pages/Home';
 import CreateAccount from './pages/CreateAccount';
 import { AuthProvider } from './contexts/AuthContext';
+import PaymentPage from './pages/PaymentPage';
 
 import CreateOrder from './pages/CreateOrder';
 import LoginForm from './pages/LoginForm';
@@ -38,6 +39,7 @@ function App() {
         <Route path="/manager" element={<PageManager />} />
         <Route path="/owner" element={<PageOwner />} />
         <Route path="/create-order/:tableId" element={<CreateOrder />} /> 
+        <Route path="/payment/:tableId" element={<PaymentPage />} />
       </Routes>
     </AuthProvider>
       {/* import toast container */}

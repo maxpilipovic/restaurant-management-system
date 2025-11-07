@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 const CreateOrder = () => {
   const [orderItems, setOrderItems] = useState([]);
@@ -562,13 +563,13 @@ const fetchUpdatedOrderItems = async () => {
           )}
         </div>
       </div>
-      <div className = "flex justify-center items-center mt-10">
-        <button
-          className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition transform active:scale-95"
-          type="submit"
+      <div className="flex justify-center items-center mt-10">
+        <Link
+          to={`/payment/${tableId}`} 
+          className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition transform active:scale-95 inline-block text-center"
         >
           Proceed to Payment!
-        </button>
+        </Link>
       </div>
     </div>
   );
