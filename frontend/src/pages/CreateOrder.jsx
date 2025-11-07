@@ -505,7 +505,9 @@ const fetchUpdatedOrderItems = async () => {
         </div>
       </form>
       <div className="mt-10">
-        <h2 className="text-3xl font-bold mb-4">Current Order - Table {table}</h2>
+        <h2 className="text-3xl font-bold mb-4">
+          Current Order - Table {table}
+        </h2>
         <div className="bg-white p-4 rounded-lg shadow-md">
           {orderItems.length === 0 ? (
             <p className="text-gray-500">No items have been added yet.</p>
@@ -516,8 +518,7 @@ const fetchUpdatedOrderItems = async () => {
                   <div className="flex justify-between items-center">
                     <div>
                       <p className="font-bold text-lg">
-                        {item.quantity} x {item.name} ({item.category}) 
-                        
+                        {item.quantity} x {item.name} ({item.category})
                       </p>
                       {item.name.toLowerCase().includes("soda") &&
                         item.flavor && (
@@ -560,6 +561,14 @@ const fetchUpdatedOrderItems = async () => {
             </ul>
           )}
         </div>
+      </div>
+      <div className = "flex justify-center items-center mt-10">
+        <button
+          className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition transform active:scale-95"
+          type="submit"
+        >
+          Proceed to Payment!
+        </button>
       </div>
     </div>
   );

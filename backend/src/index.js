@@ -565,3 +565,95 @@ app.get('/api/getpayments', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
+// CREATE A NEW ORDER (Open Tab)
+app.post('/api/orders/create', async (req, res) => {
+  const { table_id, waiter_id } = req.body;
+
+  try {
+    const { data, error } = await supabase
+      .from('orders')
+      .insert([
+        {
+          table_id,
+          waiter_id,
+          order_status: 'Open',
+          total_amount: 0,
+          tip_amount: 0
+        }
+      ])
+      .select();
+
+    if (error) {
+      console.error('Supabase insert error:', error);
+      return res.status(500).json({ error: 'Failed to create new order' });
+    }
+
+    res.status(201).json(data); // returns the new order, including order_id
+  } catch (error) {
+    console.error('Error creating new order:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// UPDATE ORDER ITEM (item, quantity, special requests, etc.)
+app.put('/api/order_items/:id', async (req, res) => {
+  const { id } = req.params;
+  const { item_id, quantity, special_requests } = req.body;
+
+  try {
+    const { data, error } = await supabase
+      .from('order_items')
+      .update({ item_id, quantity, special_requests })
+      .eq('order_item_id', id)
+      .select();
+
+    if (error) {
+      console.error("Supabase update error:", error);
+      return res.status(500).json({ error: 'Failed to update order item' });
+    }
+
+    res.json(data);
+  } catch (error) {
+    console.error("Error updating order item:", error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// GET order items by order_id (with menu item details)
+app.get('/api/order_items/:order_id', async (req, res) => {
+  const { order_id } = req.params;
+  try {
+    console.log('Fetching items for some reason');
+    const { data, error } = await supabase
+      .from('order_items')
+      .select(`
+        order_item_id,
+        order_id,
+        item_id,
+        quantity,
+        special_requests,
+        menu_items (
+          name,
+          category
+        )
+      `)
+      .eq('order_id', order_id);
+
+    if (error) throw error;
+
+    // Flatten the nested menu_items field so the frontend gets simple keys
+    const formatted = data.map(item => ({
+      id: item.order_item_id,
+      name: item.menu_items?.name || 'Unknown',
+      category: item.menu_items?.category || 'Uncategorized',
+      quantity: item.quantity,
+      notes: item.special_requests || '',
+    }));
+
+    res.json(formatted);
+  } catch (error) {
+    console.error('Error fetching order items:', error);
+    res.status(500).json({ error: 'Failed to fetch order items' });
+  }
+});
