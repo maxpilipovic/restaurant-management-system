@@ -133,7 +133,7 @@ export const PageChef = () => {
       <Tabs
         children={[
           {
-            label: "Users",
+            label: "Tables",
             content: (
               <div className="grid grid-cols-5 gap-6">
                 {orders.map((order) => (
@@ -146,6 +146,7 @@ export const PageChef = () => {
               </div>
             )
           },
+          //Make another tab for completed orders?
         ]}
       />
     </div>

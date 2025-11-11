@@ -90,7 +90,7 @@ export const PageOwner = () => {
     useEffect(() => {
       const fetchOrderItems = async () => {
         try {
-          const response = await fetch('http://localhost:3001/api/order-items');
+          const response = await fetch('http://localhost:3001/api/get_order_items');
           const data = await response.json();
           setOrderItems(data);
         } catch (error) {

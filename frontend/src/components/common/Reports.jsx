@@ -11,28 +11,33 @@ const Reports = ({ payments, orderItems, menuItems }) => {
     useEffect(() => {
         if (!startDate || !endDate) return;
 
-        // Filter payments by date range
+        console.log(payments);
+        const start = new Date(startDate); //2025-11-10T00:00:00Z
+        const end = new Date(endDate);
+        //Make end = end of that day
+        end.setDate(end.getDate() + 1);
+
         const filteredPayments = payments.filter((p) => {
-            const date = new Date(p.payment_time);
-            return date >= new Date(startDate) && date <= new Date(endDate);
+            const date = new Date(p.payment_time); //ISO → OK
+            return date >= start && date < end;
         });
 
-        // Collect order_ids from filtered payments
+        //Collect order_ids from filtered payments
         const validOrderIds = new Set(filteredPayments.map((p) => p.order_id));
 
-        // Filter order items based on those orders
+        //Filter order items based on those orders
         const filteredOrderItems = orderItems.filter((oi) =>
             validOrderIds.has(oi.order_id)
         );
 
-        // Aggregate quantities by item_id
+        //Aggregate quantities by item_id
         const itemMap = {};
         filteredOrderItems.forEach((oi) => {
             if (!itemMap[oi.item_id]) itemMap[oi.item_id] = 0;
             itemMap[oi.item_id] += oi.quantity;
         });
 
-        // Join with menu items
+        //Join with menu items
         const stats = Object.entries(itemMap).map(([itemId, qty]) => {
             const menuItem = menuItems.find((m) => m.item_id === parseInt(itemId));
             return {
@@ -43,7 +48,7 @@ const Reports = ({ payments, orderItems, menuItems }) => {
             };
         });
 
-        // Compute total revenue from payments
+        //Compute total revenue from payments
         const total = filteredPayments.reduce((sum, p) => sum + Number(p.amount), 0);
 
         setFilteredOrders(filteredOrderItems);

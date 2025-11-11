@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from "react";
+import { useAuth } from "../contexts/AuthContext";
+import LoadingPage from "../common/loadingPage.jsx";
+import ErrorPage from "../common/errorPage.jsx";
 import { useParams, useNavigate } from "react-router-dom";
 
 const PaymentPage = () => {
+  const { user, signOut } = useAuth();
   const { tableId } = useParams();
   const [orderItems, setOrderItems] = useState([]);
   const [currentOrderId, setCurrentOrderId] = useState(null);
@@ -9,53 +13,92 @@ const PaymentPage = () => {
   const [error, setError] = useState(null);
   const [tip, setTip] = useState(0);
   const [total, setTotal] = useState(0);
+  const [authorized, setAuthorized] = useState(null);
+  const [waiterId, setWaiterId] = useState(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkAccess = async () => {
+      if (!user) {
+        //console.log(user);
+        setAuthorized(false);
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const usersResponse = await fetch("http://localhost:3001/api/users");
+        const usersData = await usersResponse.json();
+
+        //console.log("Looking for this email:", user.email);
+        const currentUser = usersData.find((u) => u.email === user.email);
+        //console.log("Found this user in database:", currentUser);
+
+        if (
+          currentUser &&
+          (currentUser.role_id === 2 || currentUser.role_id === 6)
+        ) {
+          setAuthorized(true);
+        } else {
+          setAuthorized(false);
+        }
+      } catch (error) {
+        console.error("Error during authorization check:", error);
+        setAuthorized(false);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkAccess();
+  }, [user]);
 
   useEffect(() => {
     const fetchOrderItems = async () => {
       try {
-        setLoading(true);
 
-
-        // find the order for this table
+        //Find the order for this table
         const ordersRes = await fetch("http://localhost:3001/api/orders");
         const allOrders = await ordersRes.json();
         const openOrder = allOrders.find(
           (o) => o.table_id === Number(tableId) && o.order_status === "Open"
         );
+        console.log("Found open order for table:", openOrder);
 
         if (!openOrder) {
           setError("No open order found for this table");
           return;
         }
 
+        setWaiterId(openOrder.waiter_id);
         setCurrentOrderId(openOrder.order_id);
 
-        // get items for that order
+        //Get items for that order
         const itemsRes = await fetch(
           `http://localhost:3001/api/order_items/${openOrder.order_id}`
         );
         const itemsData = await itemsRes.json();
+        console.log("Fetched order items:", itemsData);
         setOrderItems(itemsData);
 
-        // total amount
-      let computedTotal = 0;
+        //Total amount
+        let computedTotal = 0;
 
-      for (const item of itemsData) {
-        const isSoda =
-          item.category?.toLowerCase().includes("soda") ||
-          item.name?.toLowerCase().includes("soda");
+        for (const item of itemsData) {
+          const isSoda =
+            item.category?.toLowerCase().includes("soda") ||
+            item.name?.toLowerCase().includes("soda");
 
-        const qty = isSoda ? 1 : item.quantity;
-        computedTotal += item.price * qty;
-      }
+          const qty = isSoda ? 1 : item.quantity;
+          computedTotal += item.price * qty;
+        }
 
-       setTotal(computedTotal);
+        setTotal(computedTotal);
       } catch (err) {
         console.error("Failed to load order items:", err);
         setError("Failed to load order data");
       } finally {
-        setLoading(false);
+        //setLoading(false);
       }
     };
 
@@ -68,24 +111,36 @@ const PaymentPage = () => {
     const finalTotal = total + Number(tip);
 
     try {
-      const res = await fetch(
-        `http://localhost:3001/api/orders/${currentOrderId}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            table_id: Number(tableId),
-            waiter_id: 1,
-            order_status: "Completed",
-            tip_amount: Number(tip),
-            total_amount: finalTotal,
-          }),
-        }
-      );
+    //Update order
+      const res = await fetch(`http://localhost:3001/api/orders/${currentOrderId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          table_id: Number(tableId),
+          waiter_id: waiterId,
+          order_status: "Completed",
+          tip_amount: Number(tip),
+          total_amount: finalTotal,
+        }),
+      });
 
-      if (res.ok) {
+      //Post request for payments record.
+      const res2 = await fetch(`http://localhost:3001/api/payments`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          order_id: currentOrderId,
+          payment_method: "Card",
+          amount: finalTotal,
+          payment_time: new Date().toISOString(),
+        }),
+      });
+
+      //Handle clearing the table for future orders? (Maybe handled by waiter page.)
+
+      if (res.ok && res2.ok) {
         alert(`Order confirmed! Final total: $${finalTotal.toFixed(2)}`);
-        navigate("/waiter"); 
+        navigate("/waiter");
       } else {
         const msg = await res.text();
         alert("Failed to confirm order: " + msg);
@@ -96,8 +151,13 @@ const PaymentPage = () => {
     }
   };
 
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p className="text-red-600">{error}</p>;
+  if (loading) {
+    return <LoadingPage />;
+  }
+
+  if (!authorized) {
+    return <ErrorPage message="You are not authorized to view this page." />;
+  }
 
   return (
     <div className="container mx-auto p-8">
