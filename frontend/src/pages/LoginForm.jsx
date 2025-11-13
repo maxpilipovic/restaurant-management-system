@@ -57,29 +57,48 @@ const LoginForm = () => {
             switch (role) {
                 case 1:
                     console.log('Navigating to chef page');
+                    toast.success('Logged in successfully!', { 
+                        duration: 4000 //4 seconds 
+                    });
                     navigate('/host');
                     break;
                 case 2:
                     console.log('Navigating to waiter page');   
+                    toast.success('Logged in successfully!', { 
+                        duration: 4000 //4 seconds 
+                    });
                     navigate('/waiter');
                     break;
                 case 3:
                     console.log('Navigating to manager page');
+                    toast.success('Logged in successfully!', { 
+                        duration: 4000 //4 seconds 
+                    });
                     navigate('/chef');
                     break;
                 case 4:
                     console.log('Navigating to host page');
+                    toast.success('Logged in successfully!', { 
+                        duration: 4000 //4 seconds 
+                    });
                     navigate('/manager');
                     break;
                 case 5:
                     console.log('Navigating to owner page');
+                    toast.success('Logged in successfully!', { 
+                        duration: 4000 //4 seconds 
+                    });
                     navigate('/owner');
                     break;
                 case 6:
                     console.log('Navigating to admin page');
+                    toast.success('Logged in successfully!', { 
+                        duration: 4000 //4 seconds 
+                    });
                     navigate('/admin');
                     break;
                 default:
+                    //Do we really need this???
                     console.log('Navigating to home page');
                     navigate('/');
                     break;

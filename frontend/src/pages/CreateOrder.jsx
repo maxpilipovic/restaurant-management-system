@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Link } from "react-router-dom";
+import { toast } from 'react-toastify';
 
 const CreateOrder = () => {
   const [orderItems, setOrderItems] = useState([]);
@@ -135,7 +136,10 @@ useEffect(() => {
   const handleSubmitDrink = async (e) => {
     e.preventDefault();
     if (!selectedDrink || !table) {
-      alert("Please select a drink item");
+      toast.error('Please select a drink or food item', {
+        duration: 4000 //4 seconds
+      });
+      
       return;
     }
 
@@ -197,7 +201,9 @@ useEffect(() => {
       }
     } catch (err) {
       console.error("Error saving drink:", err);
-      alert("Failed to save drink item");
+      toast.error('Failed to save drink item', { 
+        duration: 4000 //4 seconds 
+      });
     }
   };
 
@@ -205,7 +211,9 @@ useEffect(() => {
 const handleSubmitFood = async (e) => {
   e.preventDefault();
   if (!selectedFood || !table) {
-    alert("Please select a food item");
+    toast.error('Please select a food item', { 
+      duration: 4000 //4 seconds 
+    });
     return;
   }
 
@@ -271,12 +279,20 @@ const handleSubmitFood = async (e) => {
       setFoodQuantity(1);
       setFoodNotes("");
       setEditingFoodId(null);
+
+      //Toast if it works!!!
+      toast.success('Food item added/updated successfully!', { 
+        duration: 4000 //4 seconds 
+      });
+
     } else {
       console.error("Failed to add food:", await response.text());
     }
   } catch (err) {
     console.error("Error saving food:", err);
-    alert("Failed to save food item");
+    toast.error('Failed to save food item', { 
+      duration: 4000 //4 seconds 
+    });
   }
 };
 

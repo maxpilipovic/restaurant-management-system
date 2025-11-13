@@ -3,6 +3,7 @@ import { useAuth } from "../contexts/AuthContext";
 import LoadingPage from "../common/loadingPage.jsx";
 import ErrorPage from "../common/errorPage.jsx";
 import { useParams, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const PaymentPage = () => {
   const { user, signOut } = useAuth();
@@ -148,15 +149,23 @@ const PaymentPage = () => {
       });
 
       if (res.ok && res2.ok && res3.ok) {
-        alert(`Order confirmed! Final total: $${finalTotal.toFixed(2)}`);
+
+        toast.success(`Order confirmed! Final total: $${finalTotal.toFixed(2)}`, { 
+          duration: 4000 //4 seconds 
+        });
+        
         navigate("/waiter");
       } else {
         const msg = await res.text();
-        alert("Failed to confirm order: " + msg);
+        toast.error("Failed to confirm order: " + msg, {
+          duration: 4000 //4 seconds
+        });
       }
     } catch (err) {
       console.error("Error confirming order:", err);
-      alert("Something went wrong while confirming order");
+      toast.error("Something went wrong while confirming order", {
+        duration: 4000 //4 seconds
+      });
     }
   };
 
