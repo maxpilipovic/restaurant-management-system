@@ -1,6 +1,11 @@
 import React from "react";
 
 const ChefCard = ({ order, onUpdateStatus }) => {
+
+  if (order.status === "Completed") {
+    return null; //Dont render orders
+  }
+  
   return (
     <div
       className={`p-6 border rounded-xl shadow-sm text-center transition-all duration-200 hover:shadow-md ${

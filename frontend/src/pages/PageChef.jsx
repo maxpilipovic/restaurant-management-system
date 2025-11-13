@@ -146,7 +146,6 @@ export const PageChef = () => {
               </div>
             )
           },
-          //Make another tab for completed orders?
         ]}
       />
     </div>
