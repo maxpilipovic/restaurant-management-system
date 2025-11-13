@@ -676,3 +676,27 @@ app.get('/api/order_items/:order_id', async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch order items' });
   }
 });
+
+//PUT for updating status of table
+app.put('/api/tables/:id', async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+
+  try {
+    const { data, error } = await supabase
+      .from('tables')
+      .update({ status })
+      .eq('table_id', id)
+      .select();  
+      
+    if (error) {
+      return res.status(500).json({ error: 'Failed to update table status' });
+    }
+
+    res.json(data);
+
+  } catch (error) {
+    console.error('Error updating table status:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+}); 

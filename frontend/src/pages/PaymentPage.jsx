@@ -9,6 +9,7 @@ const PaymentPage = () => {
   const { tableId } = useParams();
   const [orderItems, setOrderItems] = useState([]);
   const [currentOrderId, setCurrentOrderId] = useState(null);
+  const [currentTableId, setCurrentTableId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [tip, setTip] = useState(0);
@@ -72,6 +73,7 @@ const PaymentPage = () => {
 
         setWaiterId(openOrder.waiter_id);
         setCurrentOrderId(openOrder.order_id);
+        setCurrentTableId(openOrder.table_id);
 
         //Get items for that order
         const itemsRes = await fetch(
@@ -136,9 +138,16 @@ const PaymentPage = () => {
         }),
       });
 
-      //Handle clearing the table for future orders? (Maybe handled by waiter page.)
+      //Handle cleaning up the table (Open the table)
+      const res3 = await fetch(`http://localhost:3001/api/tables/${currentTableId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          status: "Open",
+        }),
+      });
 
-      if (res.ok && res2.ok) {
+      if (res.ok && res2.ok && res3.ok) {
         alert(`Order confirmed! Final total: $${finalTotal.toFixed(2)}`);
         navigate("/waiter");
       } else {
