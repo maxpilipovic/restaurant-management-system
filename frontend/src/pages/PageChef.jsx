@@ -64,7 +64,7 @@ export const PageChef = () => {
 
         //Transform the data
         //LOOK AT THIS ANDREW...
-        const transformedOrders = ordersData.map(order => {
+        const transformedOrders = ordersData.filter(order => order.order_status !== "Completed").map(order => {
           const table = tablesData.find(t => t.table_id === order.table_id);
           const items = orderItemsData
             .filter(item => item.order_id === order.order_id)
@@ -74,7 +74,6 @@ export const PageChef = () => {
               return `${menuItem?.name || 'Item'}${item.quantity > 1 ? ` x${item.quantity}` : ''}`;
             });
         //LOOK AT THIS ANDREW...
-
           return {
             id: order.order_id,
             table: table?.table_number || 'N/A',
@@ -92,6 +91,9 @@ export const PageChef = () => {
     fetchData();
   }, []);
 
+
+
+  //Here we are updating the status of the order, I need to go in and ensure that deleting an order works.
   const updateStatus = async (id, newStatus) => {
     try {
       await fetch(`http://localhost:3001/api/orders/${id}`, {
