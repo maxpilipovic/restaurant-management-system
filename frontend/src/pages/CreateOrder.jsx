@@ -21,6 +21,7 @@ const CreateOrder = () => {
   const [table, setTable] = useState(tableId || "");
   const [selectedFlavor, setSelectedFlavor] = useState("");
   const [currentOrderId, setCurrentOrderId] = useState(null);
+  const [foodCookLevel, setFoodCookLevel] = useState("");
 
   
 
@@ -116,6 +117,7 @@ useEffect(() => {
       setSelectedFood(item.name);
       setFoodQuantity(item.quantity);
       setFoodNotes(item.notes || "");
+      setFoodCookLevel(item.cookLevel || "");
       setEditingFoodId(id);
       setEditingDrinkId(null); // ensure only food edit mode is active
     }
@@ -212,24 +214,6 @@ const handleSubmitFood = async (e) => {
   const foodItem = menuItems.find((item) => item.name === selectedFood);
   if (!foodItem) return;
 
-  const newOrderItem = {
-    id: editingFoodId || Date.now(),
-    name: foodItem.name,
-    category: foodItem.category,
-    table,
-    quantity: foodQuantity,
-    notes: foodNotes,
-  };
-
-  const selectedItem = menuItems.find((i) => i.name === selectedFood);
-  if (
-    selectedItem &&
-    (selectedItem.name.toLowerCase().includes("burger") ||
-      selectedItem.name.toLowerCase().includes("steak"))
-  ) {
-    newOrderItem.cookLevel = selectedItem.cookLevel || "";
-  }
-
   try {
     if (editingFoodId) {
       // edit existing food item
@@ -240,6 +224,7 @@ const handleSubmitFood = async (e) => {
           item_id: foodItem.item_id,
           quantity: Number(foodQuantity),
           special_requests: foodNotes,
+          cook_level: foodCookLevel || null,
         }),
       });
 
@@ -249,6 +234,7 @@ const handleSubmitFood = async (e) => {
       setSelectedFood("");
       setFoodQuantity(1);
       setFoodNotes("");
+      setFoodCookLevel("");
       return; // exit early after editing
     }
 
@@ -261,6 +247,7 @@ const handleSubmitFood = async (e) => {
         item_id: foodItem.item_id,
         quantity: Number(foodQuantity),
         special_requests: foodNotes,
+        cook_level: foodCookLevel || null,
       }),
     });
 
@@ -270,6 +257,7 @@ const handleSubmitFood = async (e) => {
       setSelectedFood("");
       setFoodQuantity(1);
       setFoodNotes("");
+      setFoodCookLevel("");
       setEditingFoodId(null);
     } else {
       console.error("Failed to add food:", await response.text());
@@ -446,16 +434,8 @@ const fetchUpdatedOrderItems = async () => {
               const isSteak = selectedItem.name.toLowerCase().includes("steak");
               return (
                 <select
-                  value={selectedItem.cookLevel || ""}
-                  onChange={(e) =>
-                    setMenuItems((prev) =>
-                      prev.map((i) =>
-                        i.name === selectedFood
-                          ? { ...i, cookLevel: e.target.value }
-                          : i
-                      )
-                    )
-                  }
+                  value={foodCookLevel || ""}
+                  onChange={(e) => setFoodCookLevel(e.target.value)}
                   className="border p-1 rounded"
                 >
                   <option value="" disabled>

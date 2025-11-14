@@ -255,13 +255,13 @@ app.post('/api/orders', async (req, res) => {
 //This is to create orders
 app.post('/api/order_items', async (req, res) => {
 
-  const { order_id, item_id, quantity, special_requests } = req.body;
+  const { order_id, item_id, quantity, special_requests, cook_level } = req.body;
   console.log(req.body);
 
   try {
     const { data, error } = await supabase
       .from('order_items')
-      .insert([{ order_id, item_id, quantity, special_requests }])
+      .insert([{ order_id, item_id, quantity, special_requests, cook_level }])
       .select();
 
     if (error) {
@@ -613,12 +613,12 @@ app.post('/api/orders/create', async (req, res) => {
 // UPDATE ORDER ITEM (item, quantity, special requests, etc.)
 app.put('/api/order_items/:id', async (req, res) => {
   const { id } = req.params;
-  const { item_id, quantity, special_requests } = req.body;
+  const { item_id, quantity, special_requests, cook_level } = req.body;
 
   try {
     const { data, error } = await supabase
       .from('order_items')
-      .update({ item_id, quantity, special_requests })
+      .update({ item_id, quantity, special_requests, cook_level })
       .eq('order_item_id', id)
       .select();
 
@@ -649,6 +649,7 @@ app.get('/api/order_items/:order_id', async (req, res) => {
         item_id,
         quantity,
         special_requests,
+        cook_level,
         menu_items (
           name,
           category,
@@ -666,6 +667,7 @@ app.get('/api/order_items/:order_id', async (req, res) => {
       category: item.menu_items?.category || 'Uncategorized',
       quantity: item.quantity,
       notes: item.special_requests || '',
+      cookLevel: item.cook_level || '',
       price: item.menu_items?.price || 0,
       subtotal: (item.menu_items?.price || 0) * item.quantity,
     }));
